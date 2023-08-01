@@ -26,3 +26,11 @@ shape = SubResource( 1 )
 margin_right = 40.0
 margin_bottom = 14.0
 text = "Teste:"
+
+[node name="Label2" type="Label" parent="Controller"]
+margin_left = 389.0
+margin_top = 2.0
+margin_right = 429.0
+margin_bottom = 16.0
+rect_scale = Vector2( 4.97895, 7.29509 )
+text = "Teste:"
