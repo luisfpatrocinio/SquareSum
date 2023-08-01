@@ -24,3 +24,5 @@ margin_bottom = 7.0
 text = "5"
 align = 1
 valign = 1
+
+[connection signal="area_entered" from="." to="." method="_on_Area2D2_area_entered"]

@@ -14,9 +14,19 @@ config/name="Roleta Teste"
 run/main_scene="res://Level.tscn"
 config/icon="res://icon.png"
 
+[global]
+
+global=false
+
 [gui]
 
 common/drop_mouse_on_gui_input_disabled=true
+
+[importer_defaults]
+
+texture={
+"flags/filter": false
+}
 
 [physics]
 
