@@ -16,7 +16,7 @@ onready var completedSound = preload("res://assets/pickedCoinEcho.wav")
 onready var wrongSound = preload("res://assets/errorItem.wav")
 onready var createPolygonTimer = get_node("createPolygonTimer");
 onready var polygonDeco = preload("res://Polygon.tscn");
-
+onready var flash = get_node("FlashScreen");
 onready var audio = get_node("Audio")
 
 var barAngSpd = 12
@@ -63,6 +63,9 @@ func _process(delta: float) -> void:
 #	line.rotation_degrees = round(line.rotation_degrees)
 	debugLabel.text = str(line.rotation_degrees);
 	
+	# Reduzir Flash
+	flash.color.a = lerp(flash.color.a, 0, 0.20);
+	
 	# Atualizar cor da barra
 	if len(line.colliders) > 0:
 		line.polygon.color = Color(0.408,0.761,0.827)
@@ -82,6 +85,7 @@ func _process(delta: float) -> void:
 		if get_sum(_array) == desired_number:
 			# Vitória
 			print("Acertou!"); 
+			flashScreen();
 			var _timeBonus = 5
 			timer.start(timer.time_left + _timeBonus)
 			timer.paused = true
@@ -223,6 +227,10 @@ func get_sum(array):
 	for i in array:
 		acc += i
 	return acc
+	
+
+func flashScreen():
+	flash.color.a = 1.0;
 		
 
 func _on_TimerToStart_timeout():

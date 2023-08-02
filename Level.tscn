@@ -8,10 +8,6 @@
 extents = Vector2( 119.5, 17.5 )
 
 [node name="Level" type="Node2D"]
-__meta__ = {
-"_edit_horizontal_guides_": [ 222.0, -128.0 ],
-"_edit_vertical_guides_": [ 342.0, 344.0 ]
-}
 
 [node name="Controller" type="Node" parent="."]
 script = ExtResource( 1 )
@@ -20,6 +16,11 @@ script = ExtResource( 1 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color( 0.635294, 0.862745, 0.780392, 1 )
+
+[node name="FlashScreen" type="ColorRect" parent="Controller"]
+margin_right = 960.0
+margin_bottom = 540.0
+color = Color( 1, 1, 1, 0 )
 
 [node name="Area2D" type="Area2D" parent="Controller"]
 position = Vector2( 480, 270 )
@@ -107,11 +108,11 @@ text = "+"
 align = 1
 valign = 1
 
-[node name="Audio" type="AudioStreamPlayer" parent="Controller"]
-
 [node name="CreatePolygonTimer" type="Timer" parent="Controller"]
 wait_time = 2.0
 autostart = true
+
+[node name="Audio" type="AudioStreamPlayer" parent="Controller"]
 
 [connection signal="timeout" from="Controller/Timer" to="Controller" method="_on_Timer_timeout"]
 [connection signal="timeout" from="Controller/TimerToStart" to="Controller" method="_on_TimerToStart_timeout"]
