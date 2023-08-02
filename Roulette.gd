@@ -3,18 +3,26 @@ extends Node
 onready var NumberScene = preload("res://Number.tscn")
 onready var Controller = get_parent()
 onready var line = get_node("Area2D");
-onready var debugLabel = get_node("Label")
-var numbersArray = []
-var desired_number = 0
-var actualLevel = 0
+onready var debugLabel = get_node("DebugLabel")
+onready var instructionLabel = get_node("InstructionLabel")
 onready var timer = get_node("Timer")
 onready var startTimer = get_node("TimerToStart")
 onready var timerLabel = get_node("TimerLabel")
+onready var barNumberLabel = get_node("BarNumber")
+onready var operator1 = get_node("Operator1")
+onready var operator2 = get_node("Operator2")
+var numbersArray = []
+var desired_number = 0
+var actualLevel = 0
 onready var timerValue = 0
+var barNumber = 2 + randi() % 3
 var success = false
+onready var globalAngle = 0
 
 
 func _ready() -> void:
+	# Ajustar posição da janela
+	OS.window_position = Vector2(32, 32)
 	randomize()
 	print("Spawna")
 	new_level()
@@ -23,32 +31,72 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	# Receber Input do Jogador: Inclinar Barra
 	var xAxis = Input.get_axis("ui_left", "ui_right");
-	line.rotation_degrees += xAxis;
+	if !success:
+		line.rotation_degrees += xAxis;
 	if line.rotation_degrees > 360: line.rotation_degrees -= 360
 	if line.rotation_degrees < 0: line.rotation_degrees += 360
 	line.rotation_degrees = round(line.rotation_degrees)
 	debugLabel.text = str(line.rotation_degrees);
 	
+	# Atualizar Angulo global
+	globalAngle += delta * 0.20
+	if globalAngle > 360: globalAngle -= 360;
+	
 	# Receber Input do Jogador: Botão de Confirmar
-	var confirmKey = Input.is_action_just_pressed("ui_accept")
+	var confirmKey = Input.is_action_just_pressed("ui_accept");
 	if confirmKey and !success:
 		# Checar se está certo
 		var _array = line.numbers
 		print("O valor de line.numbers é: " + str(_array))
 		if get_sum(_array) == desired_number:
 			# Vitória
+			print("Acertou!"); 
 			var _timeBonus = 5
 			timer.start(timer.time_left + _timeBonus)
 			timer.paused = true
 			startTimer.start()
 			success = true
+			
+			# Deletar numeros errados
+			for nmb in numbersArray:
+				if !(nmb in line.colliders):
+					nmb.queue_free()
+				else:
+					nmb.succeeded = true
+					
+			# Centralizar Barra
+			line.rotation_degrees = 0;
 		else:
 			# Resultado Errado
 			print("ErRRRRRrrou!")
 	
 	# Exibir Instrução
-	$Label2.text = "A soma é:" + str(desired_number)
+	instructionLabel.text = "A soma desejada é: " + str(desired_number)
 	
+	# Atualizar texto da barra:
+	barNumberLabel.text = str(barNumber)
+	var _lx = line.global_position.x - 16;
+	var _ly = line.global_position.y - 16;
+	operator1.rect_position = Vector2(
+		_lx - cos(deg2rad(line.rotation_degrees)) * 60,
+		_ly - sin(deg2rad(line.rotation_degrees)) * 60
+	)
+	operator2.rect_position = Vector2(
+		_lx + cos(deg2rad(line.rotation_degrees)) * 60,
+		_ly + sin(deg2rad(line.rotation_degrees)) * 60
+	)
+	
+	# Highlighted collided numbers:
+	for nmb in numbersArray:
+		var wr = weakref(nmb)
+		if wr.get_ref():
+			nmb.highlighted = false;
+
+	for nmb in line.colliders:
+		var wr = weakref(nmb)
+		if wr.get_ref():
+			nmb.highlighted = true
+
 	# Redefinir array de números atuais
 	line.numbers.clear()
 	
@@ -70,7 +118,9 @@ func _process(delta: float) -> void:
 		timerValue += _diff / 10
 	else:
 		timerValue = timer.time_left
-	timerLabel.text = str(ceil(timerValue))
+	
+	timerValue = ceil(timerValue * 10) / 10; 
+	timerLabel.text = str(timerValue)
 	
 
 func spawn_number(x):
@@ -79,12 +129,15 @@ func spawn_number(x):
 	add_child(number)
 	number.my_number = x
 	number.global_position = Vector2(
-		randi() % 50,
-		randi() % 30
+		480, 270
 	)
 	print("Spawnando numero: " + str(number.my_number))
 	number.my_index = len(numbersArray)
 	number.add_to_group("numbers")
+
+
+func generate_bar_number():
+	return 2 + randi() % 4;
 	
 
 func generate_desired_number():
@@ -98,13 +151,11 @@ func generate_desired_number():
 	print("Numeros escolhidos: ")
 	print(str(number1.my_index) + " ::: " + str(number1.my_number))
 	print(str(number2.my_index) + " ::: " + str(number2.my_number))
-	return number1.my_number + number2.my_number
+	return number1.my_number + number2.my_number + barNumber
 	
 	
 func new_level():
-	print("Iniciandoum novo nível: " + str(actualLevel))
-	
-	success = false
+	print("Iniciando um novo nível: " + str(actualLevel))
 	
 	numbersArray =  get_tree().get_nodes_in_group("numbers")
 	for number in numbersArray:
@@ -114,17 +165,20 @@ func new_level():
 	
 	var totalNumbers = 4 + floor(actualLevel / 3) * 2
 	print("Com " + str(totalNumbers) + " bolotas.")
-	for i in range(totalNumbers):
+	for _i in range(totalNumbers):
 		spawn_number(1 + randi() % 4)
 	actualLevel += 1
+	barNumber = generate_bar_number()
 	desired_number = generate_desired_number()
 	
 	timer.paused = false
 	timer.start()
 	
+	success = false
+	
 
 func get_sum(array):
-	var acc = 0
+	var acc = barNumber
 	for i in array:
 		acc += i
 	return acc
