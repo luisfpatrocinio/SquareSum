@@ -1,37 +1,78 @@
 extends Node
 
 onready var NumberScene = preload("res://Number.tscn")
+onready var Controller = get_parent()
 onready var line = get_node("Area2D");
 onready var debugLabel = get_node("Label")
 var numbersArray = []
 var desired_number = 0
-
+var actualLevel = 0
+onready var timer = get_node("Timer")
+onready var startTimer = get_node("TimerToStart")
+onready var timerLabel = get_node("TimerLabel")
+onready var timerValue = 0
+var success = false
 
 
 func _ready() -> void:
 	randomize()
 	print("Spawna")
-	for i in range(2 + 2 * (randi() % 5)):
-		spawn_number(1 + randi() % 4)
-	desired_number = generate_desired_number()
+	new_level()
 	
-	
+		
 func _process(delta: float) -> void:
+	# Receber Input do Jogador: Inclinar Barra
 	var xAxis = Input.get_axis("ui_left", "ui_right");
 	line.rotation_degrees += xAxis;
 	if line.rotation_degrees > 360: line.rotation_degrees -= 360
 	if line.rotation_degrees < 0: line.rotation_degrees += 360
-	
 	line.rotation_degrees = round(line.rotation_degrees)
 	debugLabel.text = str(line.rotation_degrees);
 	
+	# Receber Input do Jogador: Botão de Confirmar
+	var confirmKey = Input.is_action_just_pressed("ui_accept")
+	if confirmKey and !success:
+		# Checar se está certo
+		var _array = line.numbers
+		print("O valor de line.numbers é: " + str(_array))
+		if get_sum(_array) == desired_number:
+			# Vitória
+			var _timeBonus = 5
+			timer.start(timer.time_left + _timeBonus)
+			timer.paused = true
+			startTimer.start()
+			success = true
+		else:
+			# Resultado Errado
+			print("ErRRRRRrrou!")
+	
+	# Exibir Instrução
 	$Label2.text = "A soma é:" + str(desired_number)
 	
+	# Redefinir array de números atuais
+	line.numbers.clear()
+	
+	# Reiniciar Scene
 	if Input.is_action_just_pressed("ui_up"):
 		get_tree().reload_current_scene()
+		
+	# Tremer Barra
+	if Input.is_action_pressed("ui_down"):
+		line.global_position.x = 480 + randi() % 12;
+		line.global_position.y = 270 + randi() % 12;
+	else: 
+		line.global_position.x = 480 
+		line.global_position.y = 270 
+		
+	# Atualizar Tempo
+	var _diff = timer.time_left - timerValue
+	if abs(_diff) > 0:
+		timerValue += _diff / 10
+	else:
+		timerValue = timer.time_left
+	timerLabel.text = str(ceil(timerValue))
 	
 
-	
 func spawn_number(x):
 	numbersArray =  get_tree().get_nodes_in_group("numbers")
 	var number = NumberScene.instance()
@@ -58,4 +99,44 @@ func generate_desired_number():
 	print(str(number1.my_index) + " ::: " + str(number1.my_number))
 	print(str(number2.my_index) + " ::: " + str(number2.my_number))
 	return number1.my_number + number2.my_number
+	
+	
+func new_level():
+	print("Iniciandoum novo nível: " + str(actualLevel))
+	
+	success = false
+	
+	numbersArray =  get_tree().get_nodes_in_group("numbers")
+	for number in numbersArray:
+		number.remove_from_group("numbers")
+		number.queue_free()
+	numbersArray = []
+	
+	var totalNumbers = 4 + floor(actualLevel / 3) * 2
+	print("Com " + str(totalNumbers) + " bolotas.")
+	for i in range(totalNumbers):
+		spawn_number(1 + randi() % 4)
+	actualLevel += 1
+	desired_number = generate_desired_number()
+	
+	timer.paused = false
+	timer.start()
+	
 
+func get_sum(array):
+	var acc = 0
+	for i in array:
+		acc += i
+	return acc
+		
+
+func _on_TimerToStart_timeout():
+	print("Tempo acabou. Começando um novo level.")
+	new_level()
+
+
+func _on_Timer_timeout():
+	# Game Over
+	print("FIM de jogo")
+	get_tree().reload_current_scene()
+	pass # Replace with function body.

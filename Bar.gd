@@ -9,5 +9,4 @@ func _process(delta):
 	for collider in colliders:
 		numbers.append(collider.my_number)
 	parent.get_node("Label").text = str(numbers)
-	numbers.clear()
 

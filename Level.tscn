@@ -34,3 +34,18 @@ margin_right = 429.0
 margin_bottom = 16.0
 rect_scale = Vector2( 4.97895, 7.29509 )
 text = "Teste:"
+
+[node name="Timer" type="Timer" parent="Controller"]
+wait_time = 10.0
+
+[node name="TimerToStart" type="Timer" parent="Controller"]
+one_shot = true
+
+[node name="TimerLabel" type="Label" parent="Controller"]
+margin_left = 376.0
+margin_top = 446.0
+margin_right = 416.0
+margin_bottom = 460.0
+
+[connection signal="timeout" from="Controller/Timer" to="Controller" method="_on_Timer_timeout"]
+[connection signal="timeout" from="Controller/TimerToStart" to="Controller" method="_on_TimerToStart_timeout"]
