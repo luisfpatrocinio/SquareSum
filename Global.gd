@@ -1,4 +1,4 @@
 extends Node
 
 
-var colliding_list = []
+#var colliding_list = []
