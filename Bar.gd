@@ -6,6 +6,6 @@ var numbers = [];
 
 func _process(delta):
 	colliders = get_overlapping_areas()
-	for collider in colliders:
+	for collider in colliders:		
 		numbers.append(collider.my_number)
 #	parent.debugLabel.text = str(numbers)

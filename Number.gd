@@ -10,6 +10,7 @@ onready var label = get_node("Label")
 onready var controller = get_parent()
 onready var succeeded = false;
 onready var destroyParticles = preload("res://ExplosionParticles.tscn");
+var getSound = preload("res://assets/menuSelectionClick.wav")
 
 var shakeFactor = 3;
 
@@ -64,10 +65,16 @@ func _process(delta):
 
 
 func _on_Area2D2_tree_exiting() -> void:
-	print("Explodindo.")
 	var _part = destroyParticles.instance();
 	_part.position = global_position;
 	_part.rotation = randi() % 360;
 	_part.emitting = true;
 	get_parent().add_child(_part);
 	pass # Replace with function body.
+
+
+func _on_Area2D2_area_entered(area: Area2D) -> void:
+	if !controller.success:
+		controller.audio.stream = getSound;
+		controller.audio.pitch_scale = rand_range(0.80, 1.20)
+		controller.audio.play()

@@ -32,4 +32,5 @@ align = 1
 valign = 1
 autowrap = true
 
+[connection signal="area_entered" from="." to="." method="_on_Area2D2_area_entered"]
 [connection signal="tree_exiting" from="." to="." method="_on_Area2D2_tree_exiting"]

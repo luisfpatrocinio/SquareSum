@@ -12,6 +12,13 @@ onready var barNumberLabel = get_node("BarNumber")
 onready var operator1 = get_node("Operator1")
 onready var operator2 = get_node("Operator2")
 onready var insideDiamond = line.get_node("Polygon2D_Fundo")
+onready var completedSound = preload("res://assets/pickedCoinEcho.wav")
+onready var wrongSound = preload("res://assets/errorItem.wav")
+onready var createPolygonTimer = get_node("createPolygonTimer");
+onready var polygonDeco = preload("res://Polygon.tscn");
+
+onready var audio = get_node("Audio")
+
 var barAngSpd = 12
 var numbersArray = []
 var desired_number = 0
@@ -26,7 +33,15 @@ func _ready() -> void:
 	# Ajustar posição da janela
 	OS.window_position = Vector2(32, 32)
 	randomize()
-	print("Spawna")
+	
+	for _i in range(5):
+		var _pol = polygonDeco.instance();
+		_pol.global_position = Vector2(
+			randi() % 960,
+			randi() % 480
+		)
+		add_child(_pol)
+	
 	new_level()
 	
 		
@@ -72,16 +87,29 @@ func _process(delta: float) -> void:
 			timer.paused = true
 			startTimer.start()
 			success = true
+			audio.stream = completedSound;
+			audio.pitch_scale = min(0.80 + 0.05 * actualLevel, 2);
+			audio.play()
 			
 			# Deletar numeros errados
 			for nmb in numbersArray:
-				if !(nmb in line.colliders):
-					nmb.queue_free()
-				else:
-					nmb.succeeded = true
+				var wr = weakref(nmb)
+				if wr.get_ref():
+					if !(nmb in line.colliders):
+						nmb.queue_free()
+					else:
+						nmb.succeeded = true
 		else:
-			# Resultado Errado
-			print("ErRRRRRrrou!")
+			if len(line.colliders) > 0:
+				# Resultado Errado
+				print("ErRRRRRrrou!")
+				audio.stream = wrongSound;
+				audio.pitch_scale = rand_range(0.95, 1.05);
+				audio.play()
+				for nmb in numbersArray:
+					if nmb in line.colliders:
+						nmb.queue_free()
+				
 	
 	# Exibir Instrução
 	instructionLabel.text = "A soma desejada é: " + str(desired_number)
@@ -179,7 +207,7 @@ func new_level():
 	var totalNumbers = 4 + floor(actualLevel / 3) * 2
 	print("Com " + str(totalNumbers) + " bolotas.")
 	for _i in range(totalNumbers):
-		spawn_number(1 + randi() % 4)
+		spawn_number(1 + randi() % 8)
 	actualLevel += 1
 	barNumber = generate_bar_number()
 	desired_number = generate_desired_number()
@@ -206,4 +234,14 @@ func _on_Timer_timeout():
 	# Game Over
 	print("Fim de jogo")
 	get_tree().reload_current_scene()
+	pass # Replace with function body.
+
+
+func _on_CreatePolygonTimer_timeout() -> void:
+	var _pol = polygonDeco.instance();
+	_pol.global_position = Vector2(
+		960 + 32,
+		randi() % 480
+	)
+	add_child(_pol)
 	pass # Replace with function body.
