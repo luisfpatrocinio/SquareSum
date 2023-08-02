@@ -5,9 +5,11 @@ onready var my_index = 0;
 onready var my_number = 0;
 onready var my_scale = 0;
 onready var highlighted = false;
+onready var polygon = get_node("Polygon2D")
 onready var label = get_node("Label")
 onready var controller = get_parent()
 onready var succeeded = false;
+onready var destroyParticles = preload("res://ExplosionParticles.tscn");
 
 var shakeFactor = 3;
 
@@ -32,6 +34,11 @@ func _process(delta):
 	if highlighted:
 		posx += randi() % shakeFactor
 		posy += randi() % shakeFactor
+		polygon.color = Color(0.408,0.761,0.827)
+		label.add_color_override("font_color", Color(0.94902, 0.941176, 0.898039, 1.0))
+	else:
+		polygon.color = Color(0.294,0.502,0.792)
+		label.add_color_override("font_color", Color(0.722,0.71,0.725, 1.0))
 		
 	if succeeded:
 		if posx < 480:
@@ -54,3 +61,13 @@ func _process(delta):
 		global_position.y = posy;
 		
 #	global_position = Vector2(posx, posy)
+
+
+func _on_Area2D2_tree_exiting() -> void:
+	print("Explodindo.")
+	var _part = destroyParticles.instance();
+	_part.position = global_position;
+	_part.rotation = randi() % 360;
+	_part.emitting = true;
+	get_parent().add_child(_part);
+	pass # Replace with function body.

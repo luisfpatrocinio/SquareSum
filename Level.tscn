@@ -1,9 +1,8 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://Roulette.gd" type="Script" id=1]
 [ext_resource path="res://mnr_theme.tres" type="Theme" id=2]
 [ext_resource path="res://Bar.gd" type="Script" id=3]
-[ext_resource path="res://assets/background.png" type="Texture" id=4]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 119.5, 17.5 )
@@ -17,12 +16,23 @@ __meta__ = {
 [node name="Controller" type="Node" parent="."]
 script = ExtResource( 1 )
 
+[node name="ColorRect" type="ColorRect" parent="Controller"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = 960.0
+margin_bottom = 540.0
+color = Color( 0.635294, 0.862745, 0.780392, 1 )
+
 [node name="Area2D" type="Area2D" parent="Controller"]
 position = Vector2( 480, 270 )
 script = ExtResource( 3 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Controller/Area2D"]
 shape = SubResource( 1 )
+
+[node name="Polygon2D_Fundo" type="Polygon2D" parent="Controller/Area2D"]
+color = Color( 0.262745, 0.262745, 0.415686, 1 )
+polygon = PoolVector2Array( 0, -64, 64, 0, 0, 64, -64, 0 )
 
 [node name="Polygon2D" type="Polygon2D" parent="Controller/Area2D"]
 color = Color( 0.294118, 0.501961, 0.792157, 1 )
@@ -98,12 +108,6 @@ theme = ExtResource( 2 )
 text = "+"
 align = 1
 valign = 1
-
-[node name="Background" type="TextureRect" parent="."]
-margin_right = 960.0
-margin_bottom = 540.0
-texture = ExtResource( 4 )
-expand = true
 
 [connection signal="timeout" from="Controller/Timer" to="Controller" method="_on_Timer_timeout"]
 [connection signal="timeout" from="Controller/TimerToStart" to="Controller" method="_on_TimerToStart_timeout"]

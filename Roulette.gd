@@ -11,6 +11,8 @@ onready var timerLabel = get_node("TimerLabel")
 onready var barNumberLabel = get_node("BarNumber")
 onready var operator1 = get_node("Operator1")
 onready var operator2 = get_node("Operator2")
+onready var insideDiamond = line.get_node("Polygon2D_Fundo")
+var barAngSpd = 12
 var numbersArray = []
 var desired_number = 0
 var actualLevel = 0
@@ -31,12 +33,26 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	# Receber Input do Jogador: Inclinar Barra
 	var xAxis = Input.get_axis("ui_left", "ui_right");
+	var _destAng = line.rotation_degrees;
 	if !success:
-		line.rotation_degrees += xAxis;
-	if line.rotation_degrees > 360: line.rotation_degrees -= 360
-	if line.rotation_degrees < 0: line.rotation_degrees += 360
-	line.rotation_degrees = round(line.rotation_degrees)
+		_destAng += xAxis * barAngSpd;
+		insideDiamond.color = Color(0.262745, 0.262745, 0.415686);
+	else:
+		_destAng = 0 if line.rotation_degrees < 90 else 180
+		insideDiamond.color = Color(0.94902, 0.941176, 0.898039);
+	
+	line.rotation_degrees = lerp(line.rotation_degrees, _destAng, 0.168)
+		
+	if line.rotation_degrees > 180: line.rotation_degrees -= 180
+	if line.rotation_degrees < 0: line.rotation_degrees += 180
+#	line.rotation_degrees = round(line.rotation_degrees)
 	debugLabel.text = str(line.rotation_degrees);
+	
+	# Atualizar cor da barra
+	if len(line.colliders) > 0:
+		line.polygon.color = Color(0.408,0.761,0.827)
+	else:
+		line.polygon.color = Color(0.294,0.502,0.792)
 	
 	# Atualizar Angulo global
 	globalAngle += delta * 0.20
@@ -63,9 +79,6 @@ func _process(delta: float) -> void:
 					nmb.queue_free()
 				else:
 					nmb.succeeded = true
-					
-			# Centralizar Barra
-			line.rotation_degrees = 0;
 		else:
 			# Resultado Errado
 			print("ErRRRRRrrou!")
@@ -191,6 +204,6 @@ func _on_TimerToStart_timeout():
 
 func _on_Timer_timeout():
 	# Game Over
-	print("FIM de jogo")
+	print("Fim de jogo")
 	get_tree().reload_current_scene()
 	pass # Replace with function body.
