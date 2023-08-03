@@ -2,7 +2,7 @@ extends Node
 
 onready var NumberScene = preload("res://Number.tscn")
 onready var Controller = get_parent()
-onready var line = get_node("Area2D");
+onready var line = get_node("Line");
 onready var debugLabel = get_node("DebugLabel")
 onready var instructionLabel = get_node("InstructionLabel")
 onready var timer = get_node("Timer")
@@ -20,6 +20,8 @@ onready var flash = get_node("FlashScreen");
 onready var audio = get_node("Audio")
 onready var progressBar = get_node("TextureProgress")
 
+var canFadeTransition = false
+
 var barAngSpd = 12
 var numbersArray = []
 var desired_number = 0
@@ -32,8 +34,6 @@ onready var globalAngle = 0
 const MAX_TIME = 15;
 
 func _ready() -> void:
-	# Ajustar posição da janela
-	OS.window_position = Vector2(32, 32)
 	randomize()
 	
 	for _i in range(5):
@@ -48,6 +48,11 @@ func _ready() -> void:
 	
 		
 func _process(delta: float) -> void:
+	# Reduzir transparência da transição
+	if canFadeTransition:
+		var _transAlpha = get_parent().get_node("TransitionFadeOut");
+		_transAlpha.color.a = lerp(_transAlpha.color.a, 0, 0.068);
+	
 	# Receber Input do Jogador: Inclinar Barra
 	var xAxis = Input.get_axis("ui_left", "ui_right");
 	var _destAng = line.rotation_degrees;
@@ -84,38 +89,38 @@ func _process(delta: float) -> void:
 		# Checar se está certo
 		var _array = line.numbers
 		print("O valor de line.numbers é: " + str(_array))
-		if get_sum(_array) == desired_number:
-			# Vitória
-			print("Acertou!"); 
-			flashScreen();
-			var _timeBonus = 5
-			timer.start(min(timer.time_left + _timeBonus, MAX_TIME))
-			timer.paused = true
-			startTimer.start()
-			success = true
-			audio.stream = completedSound;
-			audio.pitch_scale = min(0.80 + 0.05 * actualLevel, 2);
-			audio.play()
-			
-			# Deletar numeros errados
-			for nmb in numbersArray:
-				var wr = weakref(nmb)
-				if wr.get_ref():
-					if !(nmb in line.colliders):
-						nmb.queue_free()
-					else:
-						nmb.succeeded = true
-		else:
-			if len(line.colliders) > 0:
-				# Resultado Errado
-				print("ErRRRRRrrou!")
-				audio.stream = wrongSound;
-				audio.pitch_scale = rand_range(0.95, 1.05);
+		if (len(_array) == 2):
+			if get_sum(_array) == desired_number:
+				# Vitória
+				print("Acertou!"); 
+				flashScreen();
+				var _timeBonus = 5
+				timer.start(timer.time_left + _timeBonus)
+				timer.paused = true
+				startTimer.start()
+				success = true
+				audio.stream = completedSound;
+				audio.pitch_scale = min(0.80 + 0.05 * actualLevel, 2);
 				audio.play()
-				for nmb in numbersArray:
-					if nmb in line.colliders:
-						nmb.queue_free()
 				
+				# Deletar numeros errados
+				for nmb in numbersArray:
+					var wr = weakref(nmb)
+					if wr.get_ref():
+						if !(nmb in line.colliders):
+							nmb.queue_free()
+						else:
+							nmb.succeeded = true
+			else:
+				if len(line.colliders) > 0:
+					# Resultado Errado
+					print("ErRRRRRrrou!")
+					audio.stream = wrongSound;
+					audio.pitch_scale = rand_range(0.95, 1.05);
+					audio.play()
+					for nmb in numbersArray:
+						if nmb in line.colliders:
+							nmb.queue_free()
 	
 	# Exibir Instrução
 	instructionLabel.text = "A soma desejada é: " + str(desired_number)
@@ -149,7 +154,7 @@ func _process(delta: float) -> void:
 	
 	# Reiniciar Scene
 	if Input.is_action_just_pressed("ui_up"):
-		get_tree().reload_current_scene()
+		get_tree().change_scene("res://MainMenu.tscn")
 		
 	# Tremer Barra
 	if Input.is_action_pressed("ui_down"):
@@ -255,4 +260,7 @@ func _on_CreatePolygonTimer_timeout() -> void:
 		randi() % 480
 	)
 	add_child(_pol)
-	pass # Replace with function body.
+
+
+func _on_TransitionTimer_timeout() -> void:
+	canFadeTransition = true;
