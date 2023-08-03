@@ -18,6 +18,7 @@ onready var createPolygonTimer = get_node("createPolygonTimer");
 onready var polygonDeco = preload("res://Polygon.tscn");
 onready var flash = get_node("FlashScreen");
 onready var audio = get_node("Audio")
+onready var progressBar = get_node("TextureProgress")
 
 var barAngSpd = 12
 var numbersArray = []
@@ -28,6 +29,7 @@ var barNumber = 2 + randi() % 3
 var success = false
 onready var globalAngle = 0
 
+const MAX_TIME = 15;
 
 func _ready() -> void:
 	# Ajustar posição da janela
@@ -87,7 +89,7 @@ func _process(delta: float) -> void:
 			print("Acertou!"); 
 			flashScreen();
 			var _timeBonus = 5
-			timer.start(timer.time_left + _timeBonus)
+			timer.start(min(timer.time_left + _timeBonus, MAX_TIME))
 			timer.paused = true
 			startTimer.start()
 			success = true
@@ -165,7 +167,8 @@ func _process(delta: float) -> void:
 		timerValue = timer.time_left
 	
 	timerValue = ceil(timerValue * 10) / 10; 
-	timerLabel.text = str(timerValue)
+	progressBar.value = 100 * timerValue / MAX_TIME
+	progressBar.get_node("TimerLabel").text = str(timerValue)
 	
 
 func spawn_number(x):
