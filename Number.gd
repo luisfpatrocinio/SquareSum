@@ -19,7 +19,7 @@ func _ready() -> void:
 
 
 func _process(delta):
-	if my_scale < 1:
+	if my_scale < 1 and controller.canFadeTransition:
 		my_scale += 0.078
 	else:
 		my_scale = 1

@@ -13,6 +13,7 @@ extents = Vector2( 119.5, 17.5 )
 script = ExtResource( 1 )
 
 [node name="ColorRect" type="ColorRect" parent="Controller"]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color( 0.635294, 0.862745, 0.780392, 1 )
@@ -114,6 +115,14 @@ autostart = true
 
 [node name="Audio" type="AudioStreamPlayer" parent="Controller"]
 
+[node name="TransitionTimer" type="Timer" parent="Controller"]
+autostart = true
+
+[node name="TransitionFadeOut" type="ColorRect" parent="."]
+margin_right = 960.0
+margin_bottom = 540.0
+
 [connection signal="timeout" from="Controller/Timer" to="Controller" method="_on_Timer_timeout"]
 [connection signal="timeout" from="Controller/TimerToStart" to="Controller" method="_on_TimerToStart_timeout"]
 [connection signal="timeout" from="Controller/CreatePolygonTimer" to="Controller" method="_on_CreatePolygonTimer_timeout"]
+[connection signal="timeout" from="Controller/TransitionTimer" to="Controller" method="_on_TransitionTimer_timeout"]

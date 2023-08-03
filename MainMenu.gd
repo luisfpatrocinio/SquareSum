@@ -7,9 +7,13 @@ var options = [];
 var optionScene = preload("res://MenuOption.tscn");
 onready var createPolygonTimer = get_node("createPolygonTimer");
 onready var polygonDeco = preload("res://Polygon.tscn");
+var changingScene = false;
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	# Ajustar posição da janela
+	OS.center_window()
+	
 	# Create Options
 	var _optionsNmb = 2;
 	var _spac = 960 / (_optionsNmb + 1);
@@ -36,7 +40,7 @@ func _process(delta: float) -> void:
 	
 	# Get Input
 	var xAxis = Input.get_axis("ui_left", "ui_right");
-	if (xAxis != 0 and inputCooldown < 0):
+	if (xAxis != 0 and inputCooldown < 0 and !changingScene):
 		selected += sign(xAxis);
 		selected = clamp(selected, 0, len(options) - 1);
 		inputCooldown = INPUT_COOLDOWN;
@@ -47,10 +51,11 @@ func _process(delta: float) -> void:
 		
 	# Confirm Option
 	var confirmKey = Input.is_action_just_pressed("ui_accept");
-	if confirmKey:
+	if confirmKey and !changingScene:
 		var _callback = options[selected].callback;
 		if _callback.is_valid():
 			_callback.call_func();
+			changingScene = true			
 
 
 func _on_CreatePolygonTimer_timeout() -> void:

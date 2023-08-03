@@ -4,6 +4,7 @@ var highlighted = false;
 var no = 0;
 onready var polygon = get_node("Polygon2D");
 onready var label = get_node("Label");
+onready var transitionScene = preload("res://Transition.tscn");
 var callback = funcref(self, "startGame");
 
 func _ready() -> void:
@@ -30,8 +31,11 @@ func _process(delta: float) -> void:
 		
 
 func startGame():
-	get_tree().change_scene("res://Level.tscn");
-	
+	print("Starting...")
+	var trans = transitionScene.instance();
+	trans.global_position = Vector2(480, 270);
+	trans.destinyScene = "res://Level.tscn";
+	get_parent().add_child(trans)
 
 func exitGame():
 	get_tree().quit()
