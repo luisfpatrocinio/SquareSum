@@ -2,7 +2,7 @@ extends Node
 
 onready var NumberScene = preload("res://Number.tscn")
 onready var Controller = get_parent()
-onready var line = get_node("Area2D");
+onready var line = get_node("Line");
 onready var debugLabel = get_node("DebugLabel")
 onready var instructionLabel = get_node("InstructionLabel")
 onready var timer = get_node("Timer")
@@ -147,7 +147,7 @@ func _process(delta: float) -> void:
 	
 	# Reiniciar Scene
 	if Input.is_action_just_pressed("ui_up"):
-		get_tree().reload_current_scene()
+		get_tree().change_scene("res://MainMenu.tscn")
 		
 	# Tremer Barra
 	if Input.is_action_pressed("ui_down"):
@@ -252,4 +252,3 @@ func _on_CreatePolygonTimer_timeout() -> void:
 		randi() % 480
 	)
 	add_child(_pol)
-	pass # Replace with function body.
