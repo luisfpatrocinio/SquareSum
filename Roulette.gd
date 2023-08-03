@@ -2,7 +2,7 @@ extends Node
 
 onready var NumberScene = preload("res://Number.tscn")
 onready var Controller = get_parent()
-onready var line = get_node("Area2D");
+onready var line = get_node("Line");
 onready var debugLabel = get_node("DebugLabel")
 onready var instructionLabel = get_node("InstructionLabel")
 onready var timer = get_node("Timer")
@@ -252,4 +252,3 @@ func _on_CreatePolygonTimer_timeout() -> void:
 		randi() % 480
 	)
 	add_child(_pol)
-	pass # Replace with function body.
