@@ -18,6 +18,7 @@ onready var createPolygonTimer = get_node("createPolygonTimer");
 onready var polygonDeco = preload("res://Polygon.tscn");
 onready var flash = get_node("FlashScreen");
 onready var audio = get_node("Audio")
+onready var progressBar = get_node("TextureProgress")
 
 var canFadeTransition = false
 
@@ -30,6 +31,7 @@ var barNumber = 2 + randi() % 3
 var success = false
 onready var globalAngle = 0
 
+const MAX_TIME = 15;
 
 func _ready() -> void:
 	randomize()
@@ -119,7 +121,6 @@ func _process(delta: float) -> void:
 					for nmb in numbersArray:
 						if nmb in line.colliders:
 							nmb.queue_free()
-				
 	
 	# Exibir Instrução
 	instructionLabel.text = "A soma desejada é: " + str(desired_number)
@@ -171,7 +172,8 @@ func _process(delta: float) -> void:
 		timerValue = timer.time_left
 	
 	timerValue = ceil(timerValue * 10) / 10; 
-	timerLabel.text = str(timerValue)
+	progressBar.value = 100 * timerValue / MAX_TIME
+	progressBar.get_node("TimerLabel").text = str(timerValue)
 	
 
 func spawn_number(x):

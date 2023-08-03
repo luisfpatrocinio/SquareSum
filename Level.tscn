@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://Roulette.gd" type="Script" id=1]
 [ext_resource path="res://mnr_theme.tres" type="Theme" id=2]
 [ext_resource path="res://Bar.gd" type="Script" id=3]
+[ext_resource path="res://ProgressBar.tscn" type="PackedScene" id=4]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 119.5, 17.5 )
@@ -30,11 +31,21 @@ script = ExtResource( 3 )
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Controller/Line"]
 shape = SubResource( 1 )
 
+<<<<<<< HEAD
+[node name="Polygon2D_Fundo" type="Polygon2D" parent="Controller/Area2D"]
+position = Vector2( 20, 79 )
+=======
 [node name="Polygon2D_Fundo" type="Polygon2D" parent="Controller/Line"]
+>>>>>>> main
 color = Color( 0.262745, 0.262745, 0.415686, 1 )
+offset = Vector2( -20, -79 )
 polygon = PoolVector2Array( 0, -64, 64, 0, 0, 64, -64, 0 )
 
 [node name="Polygon2D" type="Polygon2D" parent="Controller/Line"]
+color = Color( 0.294118, 0.501961, 0.792157, 1 )
+polygon = PoolVector2Array( -120, -16, 120, -16, 120, 16, -120, 16 )
+
+[node name="Polygon2D2" type="Polygon2D" parent="Controller/Area2D"]
 color = Color( 0.294118, 0.501961, 0.792157, 1 )
 polygon = PoolVector2Array( -120, -16, 120, -16, 120, 16, -120, 16 )
 
@@ -57,16 +68,6 @@ wait_time = 10.0
 
 [node name="TimerToStart" type="Timer" parent="Controller"]
 one_shot = true
-
-[node name="TimerLabel" type="Label" parent="Controller"]
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_top = -38.0
-theme = ExtResource( 2 )
-text = "12"
-align = 1
-valign = 2
 
 [node name="BarNumber" type="Label" parent="Controller"]
 anchor_left = 0.5
@@ -114,6 +115,12 @@ wait_time = 2.0
 autostart = true
 
 [node name="Audio" type="AudioStreamPlayer" parent="Controller"]
+
+[node name="TextureProgress" parent="Controller" instance=ExtResource( 4 )]
+margin_left = -562.0
+margin_top = 929.0
+margin_right = -1144.0
+margin_bottom = 1004.99
 
 [node name="TransitionTimer" type="Timer" parent="Controller"]
 autostart = true
