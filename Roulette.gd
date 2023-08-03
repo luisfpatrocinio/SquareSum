@@ -147,7 +147,7 @@ func _process(delta: float) -> void:
 	
 	# Reiniciar Scene
 	if Input.is_action_just_pressed("ui_up"):
-		get_tree().reload_current_scene()
+		get_tree().change_scene("res://MainMenu.tscn")
 		
 	# Tremer Barra
 	if Input.is_action_pressed("ui_down"):
