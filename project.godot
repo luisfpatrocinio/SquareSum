@@ -8,11 +8,28 @@
 
 config_version=4
 
+_global_script_classes=[ {
+"base": "",
+"class": "GDSerComm",
+"language": "NativeScript",
+"path": "res://addons/GDSerCommDock/bin/GDSerComm.gdns"
+} ]
+_global_script_class_icons={
+"GDSerComm": ""
+}
+
 [application]
 
 config/name="Roleta Teste"
 run/main_scene="res://MainMenu.tscn"
+boot_splash/image="res://assets/labirasLogo.png"
+boot_splash/fullsize=false
+boot_splash/use_filter=false
 config/icon="res://icon.png"
+
+[autoload]
+
+Global="*res://Global.gd"
 
 [display]
 
@@ -22,9 +39,14 @@ window/size/resizable=false
 window/stretch/mode="viewport"
 window/stretch/aspect="keep"
 
+[editor_plugins]
+
+enabled=PoolStringArray( "res://addons/GDSerCommDock/plugin.cfg" )
+
 [global]
 
 global=false
+config=false
 
 [gui]
 
@@ -34,6 +56,23 @@ common/drop_mouse_on_gui_input_disabled=true
 
 texture={
 "flags/filter": false
+}
+
+[input]
+
+home={
+"deadzone": 0.5,
+"events": [  ]
+}
+reset_data={
+"deadzone": 0.5,
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777245,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
+ ]
+}
+take_screenshot={
+"deadzone": 0.5,
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777238,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
+ ]
 }
 
 [physics]

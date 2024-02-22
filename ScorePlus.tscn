@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://mnr_theme.tres" type="Theme" id=1]
+[ext_resource path="res://ScorePlus.gd" type="Script" id=2]
+
+[node name="ScorePlus" type="Node2D"]
+position = Vector2( 144, 135 )
+script = ExtResource( 2 )
+
+[node name="Label" type="Label" parent="."]
+margin_right = 40.0
+margin_bottom = 14.0
+theme = ExtResource( 1 )
+text = "+ 50"
+align = 1

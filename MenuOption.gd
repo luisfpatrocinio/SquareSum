@@ -5,6 +5,8 @@ var no = 0;
 onready var polygon = get_node("Polygon2D");
 onready var label = get_node("Label");
 onready var transitionScene = preload("res://Transition.tscn");
+var scaleTo = 1;
+var myScale = 1;
 var callback = funcref(self, "startGame");
 
 func _ready() -> void:
@@ -24,11 +26,16 @@ func _process(delta: float) -> void:
 		polygon.rotation_degrees += 64 * delta;
 		if polygon.rotation_degrees > 360: polygon.rotation_degrees -= 360;
 		polygon.color = Color(0.94902, 0.941176, 0.898039);
+		scaleTo = 2
 	else:
 		var _angTo = floor(polygon.rotation_degrees / 90) * 90;
 		polygon.rotation_degrees = lerp(polygon.rotation_degrees, _angTo, 0.1680);
 		polygon.color = Color(0.262745, 0.262745, 0.415686);
-		
+		scaleTo = 1
+	
+	myScale = lerp(myScale, scaleTo, 0.168);
+	scale = Vector2(myScale, myScale);
+	
 
 func startGame():
 	print("Starting...")

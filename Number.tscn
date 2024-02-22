@@ -5,7 +5,7 @@
 
 [sub_resource type="CircleShape2D" id=1]
 
-[node name="Area2D2" type="Area2D"]
+[node name="Number" type="Area2D"]
 position = Vector2( 385, 200 )
 script = ExtResource( 1 )
 

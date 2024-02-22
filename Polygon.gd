@@ -1,6 +1,7 @@
 extends Polygon2D
 
 onready var vel = rand_range(1.0, 2.0)
+var controller = null
 
 # Declare member variables here. Examples:
 # var a: int = 2
@@ -14,6 +15,11 @@ func _ready() -> void:
 	pass # Replace with function body.
 
 func _process(delta: float) -> void:
+	var _accel = false;
+	if controller != null:
+		_accel = controller.success;
+		rotation_degrees += int(_accel) * 5
+		global_position.x -= 1
 	global_position.x -= vel
 	rotation_degrees += 2
 	if (global_position.x < -32):

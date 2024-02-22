@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/mscTitle.mp3-ea349a3f08795cc5f4c69b1c44e4b258.mp3str"
+
+[deps]
+
+source_file="res://assets/mscTitle.mp3"
+dest_files=[ "res://.import/mscTitle.mp3-ea349a3f08795cc5f4c69b1c44e4b258.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

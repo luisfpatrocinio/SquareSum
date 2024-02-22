@@ -19,6 +19,8 @@ func _ready() -> void:
 
 
 func _process(delta):
+	if len(controller.numbersArray) >= 12:
+		radius = 148;
 	if my_scale < 1 and controller.canFadeTransition:
 		my_scale += 0.078
 	else:
@@ -33,12 +35,12 @@ func _process(delta):
 	var posy = 270 + sin(angle) * radius
 	
 	if highlighted:
-		posx += randi() % shakeFactor
-		posy += randi() % shakeFactor
-		polygon.color = Color(0.408,0.761,0.827)
+		polygon.position = Vector2(randi() % shakeFactor, randi() % shakeFactor)
+		polygon.color = controller.hsv_to_rgb(controller.globalColorH, 1, 1)
 		label.add_color_override("font_color", Color(0.94902, 0.941176, 0.898039, 1.0))
 	else:
-		polygon.color = Color(0.294,0.502,0.792)
+		polygon.position = Vector2(0, 0)
+		polygon.color = controller.hsv_to_rgb(controller.globalColorH, 0.50, 0.50)
 		label.add_color_override("font_color", Color(0.722,0.71,0.725, 1.0))
 		
 	if succeeded:
@@ -75,6 +77,6 @@ func _on_Area2D2_tree_exiting() -> void:
 
 func _on_Area2D2_area_entered(area: Area2D) -> void:
 	if !controller.success:
-		controller.audio.stream = getSound;
-		controller.audio.pitch_scale = rand_range(0.80, 1.20)
-		controller.audio.play()
+		controller.audioSFX.stream = getSound;
+		controller.audioSFX.pitch_scale = rand_range(0.80, 1.20)
+		controller.audioSFX.play()
