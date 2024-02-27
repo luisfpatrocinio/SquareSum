@@ -1,10 +1,19 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://assets/mscTitle.mp3" type="AudioStream" id=1]
 [ext_resource path="res://MainMenu.gd" type="Script" id=2]
 [ext_resource path="res://mnr_theme.tres" type="Theme" id=3]
 [ext_resource path="res://MATCHUPPRO.TTF" type="DynamicFontData" id=4]
 [ext_resource path="res://CommControl.tscn" type="PackedScene" id=5]
+
+[sub_resource type="DynamicFont" id=2]
+size = 24
+outline_size = 1
+outline_color = Color( 0, 0, 0, 1 )
+font_data = ExtResource( 4 )
+
+[sub_resource type="Theme" id=3]
+default_font = SubResource( 2 )
 
 [sub_resource type="DynamicFont" id=1]
 size = 100
@@ -49,6 +58,33 @@ margin_bottom = 518.0
 theme = ExtResource( 3 )
 text = "MAIOR PONTUAÇÂO: XX"
 
+[node name="Credits" type="ColorRect" parent="."]
+margin_right = 960.0
+margin_bottom = 540.0
+color = Color( 0, 0, 0, 0.470588 )
+
+[node name="Label" type="Label" parent="Credits"]
+margin_left = 320.0
+margin_top = 200.0
+margin_right = 640.0
+margin_bottom = 300.0
+rect_pivot_offset = Vector2( 160, 50 )
+theme = SubResource( 3 )
+text = "Square Sum:
+Gameficação no Ensino Utilizando Sensores
+
+Jogo desenvolvido para a Mostra Nacional de Robótica 2023.
+
+Desenvolvido por:
+Lívia Tainá Alves de Brito
+Luis Felipe dos Santos Patrocinio
+Ryan Faustino Carvalho
+
+Labiras - IFPI"
+align = 1
+valign = 1
+autowrap = true
+
 [node name="SquareSum" type="Label" parent="."]
 margin_top = 90.0
 margin_right = 960.0
@@ -59,5 +95,7 @@ text = "SQUARE SUM"
 align = 1
 
 [node name="CommControl" parent="." instance=ExtResource( 5 )]
+
+[node name="Buttons" type="Node2D" parent="."]
 
 [connection signal="timeout" from="CreatePolygonTimer" to="." method="_on_CreatePolygonTimer_timeout"]

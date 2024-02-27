@@ -13,12 +13,14 @@ func _ready() -> void:
 	match no:
 		0: 
 			label.text = "Iniciar"; 
-			callback = funcref(self, "startGame");
-#		1:
-#			label.text = "Tutorial";			
+			callback = funcref(self, "startGame");	
 		1:
+			label.text = "Créditos";
+			callback = funcref(self, "showCredits");
+		2:
 			label.text = "Sair";
 			callback = funcref(self, "exitGame");
+
 
 
 func _process(delta: float) -> void:
@@ -42,7 +44,11 @@ func startGame():
 	var trans = transitionScene.instance();
 	trans.global_position = Vector2(480, 270);
 	trans.destinyScene = "res://Level.tscn";
-	get_parent().add_child(trans)
+	get_parent().get_parent().add_child(trans)
+	
+func showCredits():
+	get_parent().get_parent().showingCredits = true;
+	pass
 
 func exitGame():
 	get_tree().quit()

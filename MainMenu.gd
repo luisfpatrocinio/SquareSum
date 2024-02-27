@@ -19,6 +19,9 @@ onready var highScoreLabel = get_node("HighScore")
 
 onready var Esplora = get_node("CommControl")
 
+var showingCredits: bool = false;
+var creditsAlpha: float = 0.0;
+
 func playSFX(snd):
 	audioSFX.stream = snd
 	audioSFX.play()
@@ -31,13 +34,15 @@ func _ready() -> void:
 	OS.center_window()
 	
 	# Create Options
-	var _optionsNmb = 2;
+	var _optionsNmb = 3;
+	if OS.get_name() == "HTML5": _optionsNmb = 2;
 	var _spac = 960 / (_optionsNmb + 1);
 	for i in range(_optionsNmb):
 		var _op = optionScene.instance();
 		_op.global_position = Vector2(_spac + _spac * i, 270);
 		_op.no = i
-		add_child(_op);
+		# @TODO: Adicionar esses childs num node proprio.
+		get_node("Buttons").add_child(_op);
 		options.append(_op);
 		
 	# Create Decoration Polygons
@@ -96,6 +101,7 @@ func _process(delta: float) -> void:
 			_callback.call_func();
 			playSFX(confirmSnd)
 			changingScene = true
+			confirmKey = false
 			
 	# Show HighScore
 	var _greatest_score = Global.data_dict["greatest_score"]
@@ -103,9 +109,18 @@ func _process(delta: float) -> void:
 	highScoreLabel.text = "MAIOR PONTUAÇÃO: " + str(_greatest_score)
 	var _angle = OS.get_ticks_msec() / 200
 	highScoreLabel.set_position(Vector2(
-			highScoreLabel.get_position().x,
-			 highScoreLabel.get_position().y + sin(_angle) * 0.5)
-			)
+	highScoreLabel.get_position().x,
+	 highScoreLabel.get_position().y + sin(_angle) * 0.5)
+	)
+	
+	# Exibir Créditos
+	get_node("Credits").modulate.a = move_toward(get_node("Credits").modulate.a, int(showingCredits), 0.168);
+	get_node("Buttons").visible = !showingCredits;
+	get_node("HighScore").visible = !showingCredits;
+	if (showingCredits):
+		if confirmKey:
+			showingCredits = false;
+			changingScene = false;
 	
 
 func _on_CreatePolygonTimer_timeout() -> void:
