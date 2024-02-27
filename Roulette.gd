@@ -147,7 +147,7 @@ func _process(delta: float) -> void:
 			0, scoreDisplay.get_position().y + 100))
 		instructionLabel.rect_size.x = 960
 		
-		if score > greatest_score or greatest_score == 0 or diff == 0:
+		if score > greatest_score:
 			Global.data_dict["greatest_score"] = score
 			instructionLabel.text = "Novo recorde!"
 			var _hue = float(OS.get_ticks_msec() / 50 % 100)
@@ -247,6 +247,9 @@ func _process(delta: float) -> void:
 #	var confirmKey = Esplora.get_button_pressed("DOWN");
 	
 #	print("Button Down: " + str(Esplora.BUTTON_DOWN))
+
+	
+		
 	
 	if confirmKey and !success:
 		if gameOver and can_exit:
@@ -386,6 +389,9 @@ func _process(delta: float) -> void:
 	else:
 		timerValue = timer.time_left
 	
+	# Esconder Barra de Tempo  no nível 1
+	var _newBarPos = -90 if actualLevel == 1 else 90;
+	progressBar.rect_position.x = move_toward(progressBar.rect_position.x, _newBarPos, 16);
 	
 	# Atualizando a barra de acordo com o tempo decorrido
 	progressBar.get_node("TimerLabel").text = str(int(timerValue))
@@ -583,7 +589,8 @@ func _on_ComboTimer_timeout() -> void:
 
 func _on_canExitTimer_timeout():
 	print("[ canExitTimer ] Pode sair para o menu principal")
-	var exitWarn = get_node("exitWarn")
-	exitWarn.visible = true
+	var exitWarn = get_node("exitWarn");
+	exitWarn.visible = true;
+	exitWarn.text = "Aperte %s para sair." % ["SWITCH 1" if Global.usingEsplora else "ENTER"];
 	can_exit = true
 	

@@ -123,9 +123,9 @@ autostart = true
 
 [node name="TimerBar" type="TextureProgress" parent="Controller"]
 anchor_right = 1.0
-margin_left = 89.0
+margin_left = 90.0
 margin_top = 528.0
-margin_right = -413.0
+margin_right = -412.0
 margin_bottom = 578.0
 rect_rotation = -90.0
 value = 50.0
