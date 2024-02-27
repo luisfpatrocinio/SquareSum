@@ -147,7 +147,7 @@ func _process(delta: float) -> void:
 			0, scoreDisplay.get_position().y + 100))
 		instructionLabel.rect_size.x = 960
 		
-		if score > greatest_score:
+		if score > greatest_score or greatest_score == 0 or diff == 0:
 			Global.data_dict["greatest_score"] = score
 			instructionLabel.text = "Novo recorde!"
 			var _hue = float(OS.get_ticks_msec() / 50 % 100)
