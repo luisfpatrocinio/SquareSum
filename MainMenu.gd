@@ -1,6 +1,6 @@
 extends Node2D
 
-const INPUT_COOLDOWN = 8;
+const INPUT_COOLDOWN = 16;
 var inputCooldown = -1;
 var selected = 0;
 var options = [];
@@ -91,7 +91,7 @@ func _process(delta: float) -> void:
 	for option in options:
 		option.highlighted = (option.no == selected);
 		
-	print(Esplora.get_tilt())
+#	print(Esplora.get_tilt())
 		
 	# Confirm Option
 	var confirmKey = Input.is_action_just_pressed("ui_accept") or Esplora.get_button_pressed("DOWN");
@@ -121,6 +121,9 @@ func _process(delta: float) -> void:
 		if confirmKey:
 			showingCredits = false;
 			changingScene = false;
+			
+	# Mover título durante créditos:
+	get_node("SquareSum").rect_position.y = move_toward(get_node("SquareSum").rect_position.y, 90 - int(showingCredits) * 45, 12)
 	
 
 func _on_CreatePolygonTimer_timeout() -> void:

@@ -65,9 +65,9 @@ color = Color( 0, 0, 0, 0.470588 )
 
 [node name="Label" type="Label" parent="Credits"]
 margin_left = 320.0
-margin_top = 200.0
+margin_top = 120.0
 margin_right = 640.0
-margin_bottom = 300.0
+margin_bottom = 500.0
 rect_pivot_offset = Vector2( 160, 50 )
 theme = SubResource( 3 )
 text = "Square Sum:
@@ -79,6 +79,10 @@ Desenvolvido por:
 Lívia Tainá Alves de Brito
 Luis Felipe dos Santos Patrocinio
 Ryan Faustino Carvalho
+
+Músicas:
+Stars Don't Twinkle - Level27
+The Club Entrance - Level27
 
 Labiras - IFPI"
 align = 1
