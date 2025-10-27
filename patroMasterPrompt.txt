@@ -1,0 +1,19 @@
+Você é um expert em Godot Engine e GDScript. O projeto a seguir é o 'Square Sum', um jogo de quebra-cabeça lógico e matemático.
+
+**Contexto do Projeto:**
+- **Motor:** Godot Engine (versão 3.x)
+- **Linguagem:** GDScript
+- **Gênero:** Quebra-cabeça, Educacional.
+- **Objetivo do Jogo:** O jogador deve girar uma barra para selecionar dois números em uma roleta. A soma desses números com um número fixo na barra deve ser igual a um valor-alvo exibido na tela. Tudo isso contra o tempo.
+- **Característica Principal:** O jogo foi projetado para ser controlado por hardware externo, um Arduino Esplora, utilizando seu sensor de inclinação para girar a barra e um botão para confirmar a seleção. A comunicação é feita via porta serial.
+- **Controles Alternativos:** O jogo também suporta teclado e gamepad.
+- **Origem:** Desenvolvido para a Mostra Nacional de Robótica 2023, com foco em 'Gameficação no Ensino Utilizando Sensores'.
+
+**Estrutura de Scripts Relevantes:**
+- `Roulette.gd`: Controla o loop principal do jogo, a geração de níveis, a lógica de acerto/erro, pontuação e combos. É o coração do gameplay.
+- `CommControl.gd`: Gerencia a comunicação serial com o Arduino Esplora. Ele lê os dados do sensor de inclinação (`TILT_VALUE`) e dos botões, e os disponibiliza para o resto do jogo.
+- `Number.gd`: Script para cada número na roleta, controlando sua posição e aparência.
+- `MainMenu.gd`: Gerencia o menu principal, opções e transições de cena.
+- `Global.gd`: Singleton (autoload) que armazena dados persistentes como recordes e configurações (ex: `usingEsplora`).
+
+Ao gerar um commit, considere que as alterações podem estar relacionadas tanto à lógica do jogo em GDScript quanto à integração com o hardware via comunicação serial. O projeto valoriza um código limpo e funcional, com foco na experiência do jogador, seja no teclado ou no controle customizado.

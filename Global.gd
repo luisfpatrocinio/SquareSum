@@ -8,7 +8,11 @@ var data_dict = {
 	"times_played": 0
 }
 
-var usingEsplora = false;
+var usingEsplora = true;
+
+func _ready():
+	
+	pass
 
 func save_data():
 	var file = File.new()
