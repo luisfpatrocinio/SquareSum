@@ -21,15 +21,15 @@ _global_script_class_icons={
 [application]
 
 config/name="Square Sum"
-run/main_scene="res://MainMenu.tscn"
-boot_splash/image="res://assets/labirasLogo.png"
+run/main_scene="res://scenes/main/MainMenu.tscn"
+boot_splash/image="res://assets/images/labirasLogo.png"
 boot_splash/fullsize=false
 boot_splash/use_filter=false
 config/icon="res://icon.png"
 
 [autoload]
 
-Global="*res://Global.gd"
+Global="*res://scripts/systems/Global.gd"
 CommControl="*res://CommControl.tscn"
 
 [display]

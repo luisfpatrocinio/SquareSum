@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/mscGame.mp3-74d364dfbd532b5f0ac8c1b8a2e459ad.mp3str"
+
+[deps]
+
+source_file="res://assets/music/mscGame.mp3"
+dest_files=[ "res://.import/mscGame.mp3-74d364dfbd532b5f0ac8c1b8a2e459ad.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

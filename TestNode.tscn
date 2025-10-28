@@ -1,6 +1,14 @@
 [gd_scene load_steps=2 format=2]
 
-[ext_resource path="res://TestNOde.gd" type="Script" id=1]
+[sub_resource type="GDScript" id=1]
+script/source = "extends Node
+
+onready var SERCOMM = preload(\"res://addons/GDSerCommDock/bin/GDSerComm.gdns\");
+
+func _process(delta):
+	if Input.is_action_just_pressed(\"ui_accept\"):
+		print(SERCOMM);
+"
 
 [node name="Node" type="Node"]
-script = ExtResource( 1 )
+script = SubResource( 1 )
