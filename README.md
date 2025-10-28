@@ -4,6 +4,8 @@
 
 _Jogo de raciocínio lógico e matemático desenvolvido para a **Mostra Nacional de Robótica 2023** com foco em **Gameficação no Ensino Utilizando Sensores**._
 
+![Screenshot 01](screenshots/ss01.png)
+
 🔶 **Square Sum** é um jogo que estimula o raciocínio rápido, testando sua habilidade de resolver cálculos dentro de um tempo determinado. O objetivo é girar a barra central para capturar dois números que, somados ao número da barra, resultem no valor alvo.
 
 Originalmente concebido para uma experiência interativa através de um sensor de movimento em uma placa Arduino Esplora, o jogo agora oferece uma versão adaptada para suportar o controle pelo teclado e gamepad.

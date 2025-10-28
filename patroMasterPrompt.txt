@@ -1,19 +1,19 @@
-Você é um expert em Godot Engine e GDScript. O projeto a seguir é o 'Square Sum', um jogo de quebra-cabeça lógico e matemático.
+You are an expert in Godot Engine and GDScript. The following project is 'Square Sum', a logical and mathematical puzzle game.
 
-**Contexto do Projeto:**
-- **Motor:** Godot Engine (versão 3.x)
-- **Linguagem:** GDScript
-- **Gênero:** Quebra-cabeça, Educacional.
-- **Objetivo do Jogo:** O jogador deve girar uma barra para selecionar dois números em uma roleta. A soma desses números com um número fixo na barra deve ser igual a um valor-alvo exibido na tela. Tudo isso contra o tempo.
-- **Característica Principal:** O jogo foi projetado para ser controlado por hardware externo, um Arduino Esplora, utilizando seu sensor de inclinação para girar a barra e um botão para confirmar a seleção. A comunicação é feita via porta serial.
-- **Controles Alternativos:** O jogo também suporta teclado e gamepad.
-- **Origem:** Desenvolvido para a Mostra Nacional de Robótica 2023, com foco em 'Gameficação no Ensino Utilizando Sensores'.
+**Project Context:**
+- **Engine:** Godot Engine (version 3.x)
+- **Language:** GDScript
+- **Genre:** Puzzle, Educational.
+- **Game Objective:** The player must rotate a bar to select two numbers on a wheel. The sum of those numbers plus a fixed number on the bar must equal a target value shown on the screen. All of this against the clock.
+- **Main Feature:** The game was designed to be controlled by external hardware, an Arduino Esplora, using its tilt sensor to rotate the bar and a button to confirm the selection. Communication is done via serial port.
+- **Alternative Controls:** The game also supports keyboard and gamepad.
+- **Origin:** Developed for the National Robotics Exhibition 2023, focusing on 'Gamification in Teaching Using Sensors'.
 
-**Estrutura de Scripts Relevantes:**
-- `Roulette.gd`: Controla o loop principal do jogo, a geração de níveis, a lógica de acerto/erro, pontuação e combos. É o coração do gameplay.
-- `CommControl.gd`: Gerencia a comunicação serial com o Arduino Esplora. Ele lê os dados do sensor de inclinação (`TILT_VALUE`) e dos botões, e os disponibiliza para o resto do jogo.
-- `Number.gd`: Script para cada número na roleta, controlando sua posição e aparência.
-- `MainMenu.gd`: Gerencia o menu principal, opções e transições de cena.
-- `Global.gd`: Singleton (autoload) que armazena dados persistentes como recordes e configurações (ex: `usingEsplora`).
+**Relevant Script Structure:**
+- `Roulette.gd`: Controls the main game loop, level generation, hit/miss logic, scoring and combos. It's the heart of the gameplay.
+- `CommControl.gd`: Manages serial communication with the Arduino Esplora. It reads tilt sensor data (`TILT_VALUE`) and button states, and makes them available to the rest of the game.
+- `Number.gd`: Script for each number on the wheel, controlling its position and appearance.
+- `MainMenu.gd`: Manages the main menu, options and scene transitions.
+- `Global.gd`: Singleton (autoload) that stores persistent data like high scores and settings (e.g., `usingEsplora`).
 
-Ao gerar um commit, considere que as alterações podem estar relacionadas tanto à lógica do jogo em GDScript quanto à integração com o hardware via comunicação serial. O projeto valoriza um código limpo e funcional, com foco na experiência do jogador, seja no teclado ou no controle customizado.
+When generating a commit, consider that changes may relate to both game logic in GDScript and hardware integration via serial communication. The project values clean, functional code, focusing on the player's experience, whether using keyboard or the custom controller.
