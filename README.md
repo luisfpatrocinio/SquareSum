@@ -27,7 +27,7 @@ Originalmente concebido para uma experiência interativa através de um sensor d
 - **Engine:** Godot Engine
 - **Linguagem:** GDScript
 - **Hardware:** Integração com Arduino Esplora via comunicação serial para uma experiência de controle única com sensores.
-- **Áudio:** As músicas foram criadas por _Level27_.
+- **Áudio:** As músicas foram criadas por [_Level27_](https://opengameart.org/content/level-27-press-any-key-to-continue-free-to-use-audio-tracks).
 
 ## 🚀 Como Executar o Projeto
 
