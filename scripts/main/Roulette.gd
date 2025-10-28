@@ -1,596 +1,520 @@
+## Manages the core gameplay loop, including level generation, player input, and scoring.
+##
+## This script controls the main game scene. It is responsible for spawning numbers,
+## generating the mathematical challenge for each level, handling the rotation of the
+## selection bar via player input, and tracking game state such as score, combos,
+## and the game over condition. It also dynamically adjusts the game's color palette
+## and visual feedback based on player performance and level progression.
 extends Node
 
-# TODO: Colocar as cores dentro de um "dicionário" e mudar a paleta do jogo seguindo "Distâncias entre as cores"
-var globalColorH = 0;
+#region Game Configuration & Constants
+## The maximum time in seconds the player has to complete a level.
+const MAX_TIME = 15
+## The duration in seconds a combo streak remains active before resetting.
+const COMBO_TIMER = 6
+#endregion
 
+#region Scene & Resource Preloads
+## The scene for a single, instantiable number object.
 onready var NumberScene = preload("res://scenes/game_elements/Number.tscn")
+## The scene for the decorative polygons in the background.
+onready var polygonDeco = preload("res://scenes/game_elements/Polygon.tscn")
+## The scene for the "+Score" text that appears on successful plays.
+onready var scorePlusScene = preload("res://scenes/game_elements/ScorePlus.tscn")
+## The sound effect played on a correct answer.
+onready var completedSound = preload("res://assets/sfx/pickedCoinEcho.wav")
+## The sound effect played on an incorrect answer.
+onready var wrongSound = preload("res://assets/sfx/errorItem.wav")
+#endregion
+
+#region Node References
+# Main Gameplay Elements
 onready var Controller = get_parent()
-onready var line = get_node("Line");
-onready var debugLabel = get_node("DebugLabel")
-onready var instructionLabel = get_node("InstructionLabel")
+onready var line = get_node("Line")
+onready var Esplora = get_parent().get_node("CommControl")
+onready var background = get_node("ColorRect")
+
+# Timers
 onready var timer = get_node("Timer")
 onready var startTimer = get_node("TimerToStart")
+onready var createPolygonTimer = get_node("createPolygonTimer")
+onready var canExitTimer = get_node("canExitTimer")
+onready var comboTimer = get_node("ComboTimer")
+
+# UI Labels & Displays
+onready var instructionLabel = get_node("InstructionLabel")
 onready var timerLabel = get_node("TimerLabel")
 onready var barNumberLabel = get_node("BarNumber")
 onready var operator1 = get_node("Operator1")
 onready var operator2 = get_node("Operator2")
-onready var insideDiamond = line.get_node("Polygon2D_Fundo")
-onready var completedSound = preload("res://assets/sfx/pickedCoinEcho.wav")
-onready var wrongSound = preload("res://assets/sfx/errorItem.wav")
-onready var createPolygonTimer = get_node("createPolygonTimer");
-onready var polygonDeco = preload("res://scenes/game_elements/Polygon.tscn");
-onready var flash = get_node("FlashScreen");
-onready var audioSFX = get_node("AudioSFX")
-onready var progressBar = get_node("TimerBar")
-onready var background = get_node("ColorRect")
 onready var scoreDisplay = get_node("ScoreDisplay")
-onready var canExitTimer = get_node("canExitTimer")
-onready var scorePlusScene = preload("res://scenes/game_elements/ScorePlus.tscn")
-onready var gameOverOption = preload("res://scenes/ui/MenuOption.tscn")
-onready var Esplora = get_parent().get_node("CommControl")
+onready var comboDisplay = get_node("ComboArea")
+onready var progressBar = get_node("TimerBar")
 
-var can_exit = false
-var gameOver = false
-var tutorial = false
+# Visual Effects
+onready var insideDiamond = line.get_node("Polygon2D_Fundo")
+onready var flash = get_node("FlashScreen")
+onready var audioSFX = get_node("AudioSFX")
+#endregion
 
-var score = 0;
-var direction = 1; # 1 ou -1 --- horario ou anti horario
-var penaltyTimer = 3;
+#region Game State Variables
+## Flag to indicate if the game is over.
+var gameOver: bool = false
+## Flag to allow the player to exit to the main menu from the game over screen.
+var can_exit: bool = false
+## Flag to track if player data has been saved after a game over.
+var saved: bool = false
+## The player's current score.
+var score: int = 0
+## The current level number, which influences difficulty.
+var actualLevel: int = 0
+## The current combo multiplier.
+var combo: int = 0
+## The target sum the player needs to achieve for the current level.
+var desired_number: int = 0
+## The fixed number displayed on the rotating bar.
+var barNumber: int = 0
+## The rotational direction of the number ring (1 for clockwise, -1 for counter-clockwise).
+var direction: int = 1
+## A flag indicating if the current level has been successfully completed.
+var success: bool = false
+## An array holding references to all number nodes currently in the scene.
+var numbersArray: Array = []
+## The penalty in seconds applied to the timer for a wrong answer.
+var penaltyTimer: int = 3
+#endregion
 
-const MAX_TIME = 15;
-
-var combo = 0;
-onready var comboTimer = get_node("ComboTimer")
-onready var comboDisplay = get_node("ComboArea");
-const COMBO_TIMER = 6;
-
-var canFadeTransition = false
-var saved = false
-var barAngSpd = 12;
-var numbersArray = []
-var desired_number = 0
-var actualLevel = 0
-onready var timerValue = 0
-var barNumber = 2 + randi() % 3
-var success = false
-onready var globalAngle = 0
-var wrong_timer = 0
-
-var visual_combo_angle = 0
-var score_draw = 0
+#region UI & Visual State Variables
+## The base hue for the game's dynamic color palette. Changes with the level.
+var globalColorH: float = 0.0
+## The current rotation of the number ring in radians.
+var globalAngle: float = 0.0
+## A smoothed value of the score for display purposes, preventing jittery text updates.
+var score_draw: float = 0.0
+## A timer to control the duration of the "wrong answer" visual effect.
+var wrong_timer: float = 0.0
+## The current value of the timer used for smooth progress bar animation.
+var timerValue: float = 0.0
+## The angle used for the "pop" animation of the combo display.
+var visual_combo_angle: float = 0.0
+## The rotation speed of the player-controlled bar.
+var barAngSpd: int = 12
+## A flag used to enable the fade-in transition after a short delay.
+var canFadeTransition: bool = false
+#endregion
 
 
+#region Godot Engine Callbacks
+## Initializes the game on node entry.
+##
+## Sets up the initial game state, increments the total number of games played,
+## spawns initial background decorations, and starts the first level by calling [method new_level].
 func _ready() -> void:
 	randomize()
-	# Somando 1 ao total de jogos jogados
 	Global.data_dict["times_played"] += 1
-	# setando o canvasLayer como visível
 	get_parent().get_node("CanvasLayer").visible = true
 	
 	for i in range(10):
-		var _pol = createDecoPolygon();
-		_pol.global_position = Vector2(
-			randi() % 960/5 * i/2,
-			randi() % 480
-		)
+		var _pol = createDecoPolygon()
+		_pol.global_position = Vector2(randi() % 960 / 5 * i / 2, randi() % 480)
 	
 	new_level()
 	
 		
+## Called every frame to process game logic.
+##
+## This is the main game loop. It handles:
+## - UI updates (score, labels, combo display).
+## - Game over screen logic.
+## - Dynamic color palette updates.
+## - Player input for rotating the selection bar.
+## - Input for confirming a selection.
+## - Checking for correct/incorrect answers and updating game state accordingly.
+## - Visual feedback like screen flashes and progress bar animations.
 func _process(delta: float) -> void:
-	# Aproximando a pontuação:
+	# --- General Updates ---
 	if Input.is_action_just_pressed("take_screenshot"):
 		var image = get_viewport().get_texture().get_data()
 		image.flip_y()
 		image.save_png("user://screenshot" + str(OS.get_ticks_msec() % 1000) + ".png")
-		print("Screenshot saved!")
 
+	# Smoothly animate the score display
 	var _diff = score - score_draw
-	if abs(_diff) > 5:
-		score_draw += 1
-	else:
-		score_draw = score
-	
-	
-	# Atualizar Textos
+	score_draw = lerp(score_draw, score, 0.1)
+
+	# --- UI Text Updates ---
 	if Global.usingEsplora:
-		get_node("TutorialLabel").text 	= "Incline o controle para movimentar a barra.";
+		get_node("TutorialLabel").text = "Incline o controle para movimentar a barra."
 	else:
-		get_node("TutorialLabel").text 	= "Use as setas para movimentar a barra.";
-	get_node("TutorialLabel2").text = "Obtenha a soma desejada!";
-	get_node("SwitchWarn").text 	= "Aperte %s para confirmar!" % ["SWITCH 1" if Global.usingEsplora else "ENTER"];
+		get_node("TutorialLabel").text = "Use as setas para movimentar a barra."
+	get_node("TutorialLabel2").text = "Obtenha a soma desejada!"
+	get_node("SwitchWarn").text = "Aperte %s para confirmar!" % ["SWITCH 1" if Global.usingEsplora else "ENTER"]
 	
-	
-			
-	if actualLevel <= 1:
-		timer.paused = true
-		get_node("SwitchWarn").visible = len(line.colliders) > 0
-		get_node("TutorialLabel").visible = !len(line.colliders) > 0
-		get_node("TutorialLabel2").visible = true
-		scoreDisplay.visible = false
-	else:
-		get_node("SwitchWarn").visible = false
-		get_node("TutorialLabel").visible = false
-		scoreDisplay.visible = true
-		get_node("TutorialLabel2").visible = false
-		
-		
-		
-		
-		
+	# Tutorial visibility logic
+	var is_tutorial_level = actualLevel <= 1
+	timer.paused = is_tutorial_level
+	get_node("SwitchWarn").visible = is_tutorial_level and len(line.colliders) > 0
+	get_node("TutorialLabel").visible = is_tutorial_level and not len(line.colliders) > 0
+	get_node("TutorialLabel2").visible = is_tutorial_level
+	scoreDisplay.visible = not is_tutorial_level
+
+	# --- Game Over Logic ---
 	if gameOver:
-		var _timer_started = false
-		if canExitTimer.is_stopped(): canExitTimer.start();
-		# Acessando arquivos da persistência
-		var greatest_score = Global.data_dict["greatest_score"]
-		var last_score = Global.data_dict["last_score"]
-		var diff = greatest_score - score 
-		instructionLabel.text = ""
-		Global.data_dict["last_score"] = score
+		if canExitTimer.is_stopped(): canExitTimer.start()
 		
-		# Declarando os objetos do level invisíveis
-		barNumberLabel.visible = false;
-		operator1.visible = false;
-		operator2.visible = false;
-		progressBar.visible = false;
+		# Hide gameplay elements
+		for node in [barNumberLabel, operator1, operator2, progressBar]: node.visible = false
 		
-		# Setar posição das mensagens finais
+		# Display final score and message
 		scoreDisplay.text = "Sua pontuação foi de:\n" + str(floor(score_draw))
-		scoreDisplay.margin_left = 0;
-		scoreDisplay.margin_right = 960;
-		scoreDisplay.align = Label.ALIGN_CENTER
-		instructionLabel.margin_left = 0
-		instructionLabel.margin_right = 960
 		scoreDisplay.set_position(Vector2(0, 270 - 24))
+		scoreDisplay.margin_left = 0; scoreDisplay.margin_right = 960
+		scoreDisplay.align = Label.ALIGN_CENTER
 		
-		instructionLabel.set_position(Vector2(
-			0, scoreDisplay.get_position().y + 100))
-		instructionLabel.rect_size.x = 960
+		instructionLabel.text = ""
+		instructionLabel.set_position(Vector2(0, scoreDisplay.get_position().y + 100))
+		instructionLabel.margin_left = 0; instructionLabel.margin_right = 960;
 		
-		if score > greatest_score or greatest_score == 0 or diff == 0:
+		# Check for new high score
+		var greatest_score = Global.data_dict["greatest_score"]
+		if score > greatest_score:
 			Global.data_dict["greatest_score"] = score
 			instructionLabel.text = "Novo recorde!"
-			var _hue = float(OS.get_ticks_msec() / 50 % 100)
-			_hue = float(_hue / 100)
-			instructionLabel.modulate = hsv_to_rgb(_hue, 1, 1);
+			var hue = fmod(OS.get_ticks_msec() / 500.0, 1.0)
+			instructionLabel.modulate = hsv_to_rgb(hue, 1, 1)
 		else:
-			instructionLabel.text = "Vamos, faltam " + str(diff + 1) + " pontos \n para superar sua maior pontuação!"
-		if not saved: Global.save_data(); saved = true
+			instructionLabel.text = "Vamos, faltam " + str(greatest_score - score + 1) + " pontos \n para superar sua maior pontuação!"
+			
+		# Save data once
+		if not saved:
+			Global.data_dict["last_score"] = score
+			Global.save_data()
+			saved = true
 		
-	else:
-		scoreDisplay.text = str("Pontuação: " + str(score_draw))
-		
-	# Cor da paleta vai ser alterada conforme o nivel atual
-	globalColorH = actualLevel * 0.168;
+		if (Input.is_action_just_pressed("ui_accept") or Esplora.get_button_pressed("DOWN")) and can_exit:
+			get_tree().change_scene("res://scenes/main/MainMenu.tscn")
+		return
+
+	# --- Main Gameplay Loop ---
+	scoreDisplay.text = str("Pontuação: " + str(int(score_draw)))
 	
-	# Efeito Colorido: FEVER
+	# Update color palette based on level and combo "fever"
+	globalColorH = fmod(actualLevel * 0.168, 1.0)
 	if combo > 3:
-		globalColorH = float(OS.get_ticks_msec() % 2000)/2000;
-		comboDisplay.modulate = hsv_to_rgb(globalColorH, 1, 0.8)
-		scoreDisplay.modulate = hsv_to_rgb((globalColorH), 1, 0.8 )	
+		globalColorH = fmod(OS.get_ticks_msec() / 2000.0, 1.0)
+		var fever_color = hsv_to_rgb(globalColorH, 1, 0.8)
+		comboDisplay.modulate = fever_color
+		scoreDisplay.modulate = fever_color
 	else:
-		comboDisplay.modulate = Color(1,1,1,1)
-		scoreDisplay.modulate = Color(1,1,1,1)
-	
-	var scoreP = get_node_or_null("ScorePlus")
-	if scoreP != null:
-		scoreP.modulate = scoreDisplay.modulate
-		
-	if (globalColorH > 1): globalColorH -= 1;
+		comboDisplay.modulate = Color.white
+		scoreDisplay.modulate = Color.white
 	background.color = hsv_to_rgb(globalColorH, 0.40, 0.80)
 	
-	# Atualizar cor do Esplora
-#	var _esploraColor = hsv_to_rgb(globalColorH, 1, 1)
-#	if success: _esploraColor = hsv_to_rgb(globalColorH, 0, 1)
-#	esplora.red = _esploraColor.r;
-#	esplora.green = _esploraColor.g;
-#	esplora.blue = _esploraColor.b;
-	
-	# Cores dos quadrados da barra de Tempo
-	var _bigSquare = progressBar.get_node("RecUP");
-	_bigSquare.color = hsv_to_rgb(globalColorH, 0.80, 0.50);
-	var _smallSquare = progressBar.get_node("RecDown");
-	_smallSquare.color = hsv_to_rgb(globalColorH, 0.75, 0.75);
-	
-	# Reduzir Flash
-	flash.color.a = lerp(flash.color.a, 0, 0.20);
-	
-	# Mostrar Pontuação
-#	scoreDisplay.text = str(score);
-	
-	# Tempo de penalidade vai aumentar a cada quatro niveis
-	penaltyTimer = 3 + floor(actualLevel / 4) * 1;
-	
+	# Visual effects timers
+	flash.color.a = lerp(flash.color.a, 0, 0.20)
 	wrong_timer -= 0.1
-	# Reduzir transparência da transição
 	if canFadeTransition:
-		var _transAlpha = get_parent().get_node("CanvasLayer/TransitionFadeOut");
-		_transAlpha.color.a = lerp(_transAlpha.color.a, 0, 0.068);
-	
-	# Receber Input do Jogador: Inclinar Barra
-	var xAxis = Input.get_axis("ui_left", "ui_right");
-	var tilt = Esplora.get_tilt();
-	
-	# Garantir que a linha existe antes de se rmanu
-	var lwr = weakref(line);
-	if lwr.get_ref():
-		var _destAng = line.rotation_degrees;
-		if !success:
-			_destAng += xAxis * barAngSpd;
-			# Player is tilting
-			if tilt != 0 and xAxis == 0:
-				_destAng = 90 - tilt * 180;
-			insideDiamond.color = hsv_to_rgb(globalColorH, 1, 0.50);
-		else:
-			_destAng = 0 if line.rotation_degrees < 90 else 180
-			insideDiamond.color = hsv_to_rgb(globalColorH, 1, 1);
+		var trans = get_parent().get_node("CanvasLayer/TransitionFadeOut")
+		trans.color.a = lerp(trans.color.a, 0, 0.068)
 
-		line.rotation_degrees = lerp(line.rotation_degrees, _destAng, 0.168)
-		
-		if line.rotation_degrees > 180: line.rotation_degrees -= 180
-		if line.rotation_degrees < 0: line.rotation_degrees += 180
-	
-#		debugLabel.text = str(line.rotation_degrees);
-	
-		# Atualizar cor da barra
-		if len(line.colliders) > 0:
-			line.polygon.color = hsv_to_rgb(globalColorH, 0.80, 0.80)
+	# Handle player input for bar rotation
+	var xAxis = Input.get_axis("ui_left", "ui_right")
+	var tilt = Esplora.get_tilt()
+	var lwr = weakref(line)
+	if lwr.get_ref():
+		var destAng = line.rotation_degrees
+		if not success:
+			destAng += xAxis * barAngSpd
+			if tilt != 0 and xAxis == 0: destAng = 90 - tilt * 180
+			insideDiamond.color = hsv_to_rgb(globalColorH, 1, 0.50)
 		else:
-			line.polygon.color = hsv_to_rgb(globalColorH, 0.80, 0.60)
-	
-	# Atualizar Angulo global conforme a dificuldade
-	globalAngle += delta * min(0.20 + 0.025 * actualLevel, 0.50) * direction
-	if globalAngle > 360: globalAngle -= 360;
-	
-	# Receber Input do Jogador: Botão de Confirmar
+			destAng = 0 if line.rotation_degrees < 90 else 180
+			insideDiamond.color = hsv_to_rgb(globalColorH, 1, 1)
+		line.rotation_degrees = lerp(line.rotation_degrees, destAng, 0.168)
+		
+	# Handle confirmation input
 	var confirmKey = Input.is_action_just_pressed("ui_accept") or Esplora.get_button_pressed("DOWN")
-#	var confirmKey = Esplora.get_button_pressed("DOWN");
-	
-#	print("Button Down: " + str(Esplora.BUTTON_DOWN))
+	if confirmKey and not success:
+		check_answer()
 
+	# --- UI and Visual Feedback Updates ---
+	update_instruction_label()
+	update_combo_display()
+	update_bar_elements()
+	update_highlighted_numbers()
+	update_timer_bar()
 	
+	# Update number ring rotation
+	globalAngle += delta * min(0.20 + 0.025 * actualLevel, 0.50) * direction
+#endregion
+
+
+#region Core Gameplay Logic
+	## Checks the player's submitted answer and updates the game state.
+	## Called when the player presses the confirm button.
+func check_answer():
+	if len(line.numbers) != 2: return
+
+	if get_sum(line.numbers) == desired_number:
+		# Correct answer
+		success = true
+		flashScreen()
+		timer.start(min(timer.time_left + 5, MAX_TIME))
+		timer.paused = true
+		startTimer.start()
 		
-	
-	if confirmKey and !success:
-		if gameOver and can_exit:
-			get_tree().change_scene("res://scenes/main/MainMenu.tscn")
-			return
-		elif confirmKey and gameOver:
-			return
-		# Checar se está certo
-		var _array = line.numbers
-		print(" [ level_process ] O valor de line.numbers é: " + str(_array))
-		if (len(_array) == 2):
-			if get_sum(_array) == desired_number:
-				# Vitória
-				print(" [ level_process ] Acertou!"); 
-				flashScreen();
-				var _timeBonus = 5
-				# Limitando com que o tempo máximo seja de 15 segundos
-				timer.start(min(timer.time_left + _timeBonus, 15))
-				timer.paused = true
-				startTimer.start()
-				success = true
-				audioSFX.stream = completedSound;
-				audioSFX.pitch_scale = min(0.80 + 0.05 * actualLevel, 2);
-				audioSFX.play()
-				
-				if actualLevel > 1 or Global.data_dict["times_played"] > 1:
-					combo += 1;
-					var _scoreAdd = 10 + 10 * (combo - 1);
-					var scorePlus = scorePlusScene.instance()
-					scorePlus.get_node("Label").text = "+" + str(_scoreAdd)
-					scorePlus.global_position = Vector2(
-						scoreDisplay.rect_position.x + scoreDisplay.rect_size.x - len(str(score)) * 12,
-						scoreDisplay.get_position().y)
-					
-					self.add_child(scorePlus)
-					
-					print("[ score ] _scoreAdd: " + str(_scoreAdd))
-					score += _scoreAdd;
-					visual_combo_angle = 200
-					comboTimer.start(COMBO_TIMER);
-					
-				# Deletar numeros errados
-				for nmb in numbersArray:
-					var wr = weakref(nmb)
-					if wr.get_ref():
-						if !(nmb in line.colliders):
-							nmb.queue_free()
-						else:
-							nmb.succeeded = true
-			else:
-				if len(line.colliders) > 0:
-					# Resultado Errado
-					print(" [ level_process ] ErRRRRRrrou!")
-					var new_time = max(0.5,timer.time_left - penaltyTimer)
-					timer.start(new_time)
-					wrong_timer = 5
-					comboTimer.stop();
-					combo = 0;
-					
-					audioSFX.stream = wrongSound;
-					audioSFX.pitch_scale = rand_range(0.95, 1.05);
-					audioSFX.play()
-					for nmb in numbersArray:
-						if nmb in line.colliders:
-							var wr = weakref(nmb);
-							if wr.get_ref():
-								nmb.queue_free()
-				
-	
-	# Exibir Instrução
-	if !gameOver: instructionLabel.text = "= " + str(desired_number)
-	# Adicionando o ? a cada escolha
-	if !success:
-		if lwr.get_ref():
-			if len(line.colliders) > 0:
-				instructionLabel.text += '?'
-	else:
-			instructionLabel.text += "!"
-			
-	# Exibir Combo
-	
-	var _angle = deg2rad(visual_combo_angle)  # ângulo para a escala do combo
-	if visual_combo_angle > 0: 
-		visual_combo_angle -= 6.168
-	else: 
-		if combo > 3:
+		# Sound and scoring
+		audioSFX.stream = completedSound
+		audioSFX.pitch_scale = min(0.80 + 0.05 * actualLevel, 2)
+		audioSFX.play()
+		
+		if actualLevel > 1 or Global.data_dict["times_played"] > 1:
+			combo += 1
+			var score_add = 10 + 10 * (combo - 1)
+			score += score_add
+			show_score_plus(score_add)
 			visual_combo_angle = 200
-	comboDisplay.visible = combo > 1
-	comboDisplay.get_node("Label").text = "Combo x" + str(combo) + "!";
-	var _alpha = max(sin(visual_combo_angle), 0.75)
-	comboDisplay.get_node("Label").modulate = Color(1, 1, 1, _alpha);
-	if combo > 0:
-		comboDisplay.scale = Vector2(
-			max(1 + sin(_angle), 1),
-			max(1 + sin(_angle), 1)
-			)
-	# Atualizar texto da barra:
-	if lwr.get_ref():
-		barNumberLabel.text = str(barNumber)
-		var _lx = line.global_position.x - 16;
-		var _ly = line.global_position.y - 16;
-		operator1.rect_position = Vector2(
-			_lx - cos(deg2rad(line.rotation_degrees)) * 60,
-			_ly - sin(deg2rad(line.rotation_degrees)) * 60
-		)
-		operator2.rect_position = Vector2(
-			_lx + cos(deg2rad(line.rotation_degrees)) * 60,
-			_ly + sin(deg2rad(line.rotation_degrees)) * 60
-		)
-	
-	# Highlighted collided numbers:
-	for nmb in numbersArray:
-		var wr = weakref(nmb)
-		if wr.get_ref():
-			nmb.highlighted = false;
-
-	if lwr.get_ref():	
-		for nmb in line.colliders:
+			comboTimer.start(COMBO_TIMER)
+			
+		# Clean up non-selected numbers
+		for nmb in numbersArray:
 			var wr = weakref(nmb)
-			if wr.get_ref():
-				nmb.highlighted = true
-
-		# Redefinir array de números atuais
-		line.numbers.clear()
-	
-	# Reiniciar Scene
-	# Reiniciar Scene
-	if Input.is_key_pressed(KEY_F1):
-		get_tree().change_scene("res://scenes/main/MainMenu.tscn")
-	if Input.is_key_pressed(KEY_F3):
-		combo += 1
-		
-	# Atualizar Tempo
-	var _diffTime = timer.time_left - timerValue
-	if abs(_diffTime) > 0:
-		timerValue += _diffTime / 12;
+			if wr.get_ref() and not nmb.highlighted:
+				nmb.queue_free()
+			else:
+				nmb.succeeded = true
 	else:
-		timerValue = timer.time_left
-	
-	# Esconder Barra de Tempo  no nível 1
-	var _newBarPos = -90 if actualLevel == 1 else 90;
-	progressBar.rect_position.x = move_toward(progressBar.rect_position.x, _newBarPos, 16);
-	
-	# Atualizando a barra de acordo com o tempo decorrido
-	progressBar.get_node("TimerLabel").text = str(int(timerValue))
-	progressBar.value = ((timerValue/MAX_TIME)) * 85 + 15
-	
-	# Os quadrados giram de acordo com o tempo
-	progressBar.get_node("RecDown").rotation_degrees = timerValue * 100
-	progressBar.get_node("RecUP").rotation_degrees = timerValue * -100
-	
-	# Piscando a barra enquanto aumenta o valor:
-	if success:
-		progressBar.tint_progress = hsv_to_rgb(globalColorH, 0.8, 0.8)
-	elif wrong_timer > 0:
-		progressBar.tint_progress = hsv_to_rgb(globalColorH, 0, 0)
-	else:
-		progressBar.tint_progress = hsv_to_rgb(globalColorH, 0.5, 0.5)
-	
+		# Incorrect answer
+		if len(line.colliders) > 0:
+			timer.start(max(0.5, timer.time_left - penaltyTimer))
+			wrong_timer = 5
+			combo = 0
+			comboTimer.stop()
+			
+			audioSFX.stream = wrongSound
+			audioSFX.pitch_scale = rand_range(0.95, 1.05)
+			audioSFX.play()
+			
+			# Remove wrongly selected numbers
+			for nmb in line.colliders:
+				if is_instance_valid(nmb): nmb.queue_free()
 
-func spawn_number(x):
-	numbersArray =  get_tree().get_nodes_in_group("numbers")
-	var number = NumberScene.instance()
-	add_child(number)
-	number.my_number = x
-	number.global_position = Vector2(
-		480, 270
-	)
-	print("[ spawn_number ]: Spawnando numero: " + str(number.my_number))
-	number.my_index = len(numbersArray)
-	number.add_to_group("numbers")
-
-
-func generate_bar_number():
-	# Escolhe um número aleatório entre 1 e 3, caso nos primeiros níveis.
-	# Aumentando até 1 a 9 em níveis posteriores.
-	var _number = 1 + randi() % int(max(3, min(actualLevel, 8)));
-	return _number
-	
-
-func generate_desired_number():
-	# Obter quantidade de números gerados.
-	numbersArray =  get_tree().get_nodes_in_group("numbers")
-	var _n = len(numbersArray)
-	print("Tamanho do numbersArray: " + str(_n))
-	
-	# Obter uma soma selecionando um par aleatório.
-	var randindex = randi() % (_n / 2)
-	var number1 = numbersArray[randindex]
-	var randindex2 = randindex + _n / 2
-	var number2 = numbersArray[randindex2]
-	print("Numeros escolhidos: ")
-	print(str(number1.my_index) + " ::: " + str(number1.my_number))
-	print(str(number2.my_index) + " ::: " + str(number2.my_number))
-	
-	# Retornar soma dos números, com o número da barra.
-	return number1.my_number + number2.my_number + barNumber
-	
-	
+## Sets up a new level by clearing old numbers and generating a new challenge.
 func new_level():
-	print("[ new_level ] Iniciando um novo nível: " + str(actualLevel))
+	success = false
+	direction = 1 if randi() % 2 == 0 else -1
 	
-	# Direção aleatória:
-	var _val = randi() % 2;
-	direction = -1 if _val == 0 else 1;
-	
-	var _transAlpha = get_parent().get_node("CanvasLayer/TransitionFadeOut");
-	_transAlpha.color.a = 1;
-	
-	numbersArray =  get_tree().get_nodes_in_group("numbers")
+	# Clear old numbers
+	numbersArray = get_tree().get_nodes_in_group("numbers")
 	for number in numbersArray:
-		number.remove_from_group("numbers")
-		number.queue_free()
-	numbersArray = []
+		if is_instance_valid(number): number.queue_free()
+	numbersArray.clear()
 	
-	# Número de números que serão criados:
+	# Generate new numbers based on level
 	var totalNumbers = 4 + floor(actualLevel / 3) * 2
 	if actualLevel == 0: totalNumbers = 2
-	print("[ new_level ] Com " + str(totalNumbers) + " números.")
 	
-	for _i in range(totalNumbers):
-		var _a = 1 + actualLevel + 2;
-		_a = min(_a, 8);
-		var _maxNumber = 1 + randi() % _a;
-		spawn_number(_maxNumber)
+	for i in range(totalNumbers):
+		var max_val = min(1 + actualLevel + 2, 8)
+		var num_val = 1 + randi() % max_val
+		spawn_number(num_val)
 		
 	actualLevel += 1
 	barNumber = generate_bar_number()
 	desired_number = generate_desired_number()
 	
 	timer.paused = false
-	timer.start()
+	timer.start(MAX_TIME)
 	
-	success = false
-	
-	for _i in range(3):
-		createDecoPolygon()
-	
+	for i in range(3): createDecoPolygon()
 
-func get_sum(array):
+## Calculates the total sum of numbers in an array, plus the fixed bar number.
+func get_sum(array: Array) -> int:
 	var acc = barNumber
 	for i in array:
 		acc += i
 	return acc
+#endregion
+
+
+#region Number & Level Generation
+## Spawns a single number object in the center of the screen.
+func spawn_number(value: int):
+	var number = NumberScene.instance()
+	add_child(number)
+	number.my_number = value
+	number.global_position = Vector2(480, 270)
+	number.my_index = len(get_tree().get_nodes_in_group("numbers"))
+	number.add_to_group("numbers")
+	numbersArray.append(number)
+
+## Generates the random number for the rotating bar.
+## The range of possible numbers increases with the current level.
+func generate_bar_number() -> int:
+	var max_val = int(max(3, min(actualLevel, 8)))
+	return 1 + randi() % max_val
 	
+## Generates the target number for the level.
+## It randomly picks two generated numbers and adds them to the bar number.
+func generate_desired_number() -> int:
+	if numbersArray.size() < 2: return 0
+	
+	var half_size = numbersArray.size() / 2
+	var rand_index1 = randi() % half_size
+	var rand_index2 = rand_index1 + half_size
+	
+	var number1 = numbersArray[rand_index1]
+	var number2 = numbersArray[rand_index2]
 
+	return number1.my_number + number2.my_number + barNumber
+#endregion
+
+
+#region UI & Visual Feedback
+## Triggers a brief white flash effect on the screen.
 func flashScreen():
-	flash.color.a = 1.0;
+	flash.color.a = 1.0
+
+## Instantiates a "+Score" label that floats up from the score display.
+func show_score_plus(value: int):
+	var scorePlus = scorePlusScene.instance()
+	scorePlus.get_node("Label").text = "+" + str(value)
+	scorePlus.global_position = Vector2(
+		scoreDisplay.rect_position.x + scoreDisplay.rect_size.x - 32,
+		scoreDisplay.rect_position.y)
+	add_child(scorePlus)
+	
+## Creates a single decorative polygon and adds it to the scene.
+func createDecoPolygon():
+	var poly = polygonDeco.instance()
+	poly.global_position = Vector2(960 + 32, randi() % 480)
+	poly.controller = self
+	add_child(poly)
+	return poly
+	
+## Updates the instruction label text (e.g., "= 10?" or "= 10!").
+func update_instruction_label():
+	if gameOver: return
+	instructionLabel.text = "= " + str(desired_number)
+	if not success:
+		if len(line.colliders) > 0: instructionLabel.text += "?"
+	else:
+		instructionLabel.text += "!"
 		
+## Updates the combo display's visibility, text, and animation.
+func update_combo_display():
+	comboDisplay.visible = combo > 1
+	if comboDisplay.visible:
+		comboDisplay.get_node("Label").text = "Combo x" + str(combo) + "!"
+		# Pop animation
+		var angle = deg2rad(visual_combo_angle)
+		if visual_combo_angle > 0:
+			visual_combo_angle -= 6.168
+		elif combo > 3: # "Fever" mode re-triggers animation
+			visual_combo_angle = 200
+		
+		var scale_factor = max(1 + sin(angle), 1)
+		comboDisplay.scale = Vector2(scale_factor, scale_factor)
+		var alpha = max(sin(visual_combo_angle), 0.75)
+		comboDisplay.get_node("Label").modulate.a = alpha
 
-func hsv_to_rgb(h, s, v, a = 1):
-	var r
-	var g
-	var b
+## Updates the position of the bar's number and operator labels.
+func update_bar_elements():
+	var lwr = weakref(line)
+	if not lwr.get_ref(): return
+	
+	barNumberLabel.text = str(barNumber)
+	var line_center = line.global_position - Vector2(16, 16)
+	var angle_rad = line.rotation
+	
+	operator1.rect_position = line_center - Vector2(cos(angle_rad), sin(angle_rad)) * 60
+	operator2.rect_position = line_center + Vector2(cos(angle_rad), sin(angle_rad)) * 60
 
+## Updates which numbers are visually highlighted based on collision with the bar.
+func update_highlighted_numbers():
+	for nmb in numbersArray:
+		if is_instance_valid(nmb): nmb.highlighted = false
+	
+	var lwr = weakref(line)
+	if lwr.get_ref():
+		for nmb in line.colliders:
+			if is_instance_valid(nmb): nmb.highlighted = true
+		line.numbers.clear()
+		
+## Updates the timer progress bar's value, color, and animation.
+func update_timer_bar():
+	# Animate bar into view
+	var target_x = -90 if actualLevel == 1 else 90
+	progressBar.rect_position.x = move_toward(progressBar.rect_position.x, target_x, 16)
+	
+	# Smoothly update timer value
+	timerValue = lerp(timerValue, timer.time_left, 0.1)
+	progressBar.get_node("TimerLabel").text = str(int(timerValue))
+	progressBar.value = ((timerValue / MAX_TIME)) * 85 + 15
+	
+	# Animate squares
+	progressBar.get_node("RecDown").rotation_degrees = timerValue * 100
+	progressBar.get_node("RecUP").rotation_degrees = timerValue * -100
+	
+	# Update color based on state
+	if success:
+		progressBar.tint_progress = hsv_to_rgb(globalColorH, 0.8, 0.8)
+	elif wrong_timer > 0:
+		progressBar.tint_progress = Color.black
+	else:
+		progressBar.tint_progress = hsv_to_rgb(globalColorH, 0.5, 0.5)
+#endregion
+
+
+#region Utility Functions
+## A utility function to convert HSV (Hue, Saturation, Value) color to RGB.
+func hsv_to_rgb(h: float, s: float, v: float, a: float = 1.0) -> Color:
 	var i = floor(h * 6)
 	var f = h * 6 - i
 	var p = v * (1 - s)
 	var q = v * (1 - f * s)
 	var t = v * (1 - (1 - f) * s)
-
-	match (int(i) % 6):
-		0:
-			r = v
-			g = t
-			b = p
-		1:
-			r = q
-			g = v
-			b = p
-		2:
-			r = p
-			g = v
-			b = t
-		3:
-			r = p
-			g = q
-			b = v
-		4:
-			r = t
-			g = p
-			b = v
-		5:
-			r = v
-			g = p
-			b = q
-	return Color(r, g, b, a)
+	match int(i) % 6:
+		0: return Color(v, t, p, a)
+		1: return Color(q, v, p, a)
+		2: return Color(p, v, t, a)
+		3: return Color(p, q, v, a)
+		4: return Color(t, p, v, a)
+		5: return Color(v, p, q, a)
+	return Color.white
+#endregion
 
 
+#region Signal Callbacks (Timers)
+## Called after a correct answer to delay the start of the next level.
 func _on_TimerToStart_timeout():
-	print(" [ ont_Timer_toStart_timeout ] Tempo acabou. Começando um novo level.")
 	new_level()
 
-
+## Called when the main gameplay timer runs out. Ends the game.
 func _on_Timer_timeout():
-	# Game Over
-	print(" [ on_Timer_timeout ] Fim de jogo")
-	timer.stop();
-	
-	# destruir todos os numeros
+	gameOver = true
+	timer.stop()
+	# Clean up remaining nodes
 	for nmb in numbersArray:
-		var wr = weakref(nmb)
-		if wr.get_ref():
-			nmb.queue_free();
-	
-	var lwr = weakref(line)
-	if lwr.get_ref():	
-		line.queue_free();
-	
-	gameOver = true;
-		
-	
+		if is_instance_valid(nmb): nmb.queue_free()
+	if is_instance_valid(line): line.queue_free()
 
-func createDecoPolygon(): 
-	var _pol = polygonDeco.instance();
-	_pol.global_position = Vector2(
-		960 + 32,
-		randi() % 480
-	)
-	_pol.controller = self;
-	add_child(_pol)
-	return _pol
-
-
+## Called periodically to spawn new decorative polygons in the background.
 func _on_CreatePolygonTimer_timeout() -> void:
-	createDecoPolygon();
+	createDecoPolygon()
 
-
+## Called once at the start to enable the fade-in transition.
 func _on_TransitionTimer_timeout() -> void:
-	canFadeTransition = true;
+	canFadeTransition = true
 
-
+## Triggered when the combo window expires. Resets the combo counter.
 func _on_ComboTimer_timeout() -> void:
-	print("[ on_Combo_timeout ] Combo Resetado.")
-	combo = 0;
+	combo = 0
 
-
+## Triggered after a delay on the game over screen to allow exiting.
 func _on_canExitTimer_timeout():
-	print("[ canExitTimer ] Pode sair para o menu principal")
-	var exitWarn = get_node("exitWarn");
-	exitWarn.visible = true;
-	exitWarn.text = "Aperte %s para sair." % ["SWITCH 1" if Global.usingEsplora else "ENTER"];
+	var exitWarn = get_node("exitWarn")
+	exitWarn.visible = true
+	exitWarn.text = "Aperte %s para sair." % ["SWITCH 1" if Global.usingEsplora else "ENTER"]
 	can_exit = true
-	
+#endregion
