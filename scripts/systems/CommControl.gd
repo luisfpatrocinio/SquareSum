@@ -34,7 +34,7 @@ func _ready():
 			print("Não foi possível estabelecer uma comunicação com a porta desejada. Cheque se a porta desejada foi selecionada corretamente.")
 	
 	
-func _physics_process(delta):
+func _physics_process(_delta):
 	# DEBUG:
 #	print("No Esplora: " + str(get_slider()))
 	if (Input.is_key_pressed(KEY_A)):
@@ -47,7 +47,7 @@ func _physics_process(delta):
 		
 #	print(str(PORT.get_available()))
 	if PORT != null && PORT.get_available()>0:
-		for i in range(PORT.get_available()):
+		for _i in range(PORT.get_available()):
 			message_to_receive = str(PORT.read())
 			
 			var _msg = ""

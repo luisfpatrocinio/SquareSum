@@ -16,15 +16,11 @@ const INPUT_COOLDOWN = 16
 var optionScene = preload("res://scenes/ui/MenuOption.tscn")
 ## The scene for the decorative polygons that float in the background.
 onready var polygonDeco = preload("res://scenes/game_elements/Polygon.tscn")
-## Sound effect played when moving the cursor between options.
-var cursorSnd = preload("res://assets/sfx/menuSelectionClick.wav")
-## Sound effect played when an option is confirmed.
-var confirmSnd = preload("res://assets/sfx/pickedCoinEcho.wav")
 #endregion
 
 #region Node References
 ## Timer used to periodically spawn new decorative polygons.
-onready var createPolygonTimer = get_node("createPolygonTimer")
+onready var createPolygonTimer = get_node("CreatePolygonTimer")
 ## The ColorRect node used for the screen fade-out transition effect.
 onready var transAlpha = get_node("CanvasLayer/TransitionFadeOut")
 ## The AudioStreamPlayer responsible for playing menu sound effects.
@@ -52,13 +48,6 @@ var showingCredits: bool = false
 var creditsAlpha: float = 0.0
 #endregion
 
-
-## Plays a given sound effect.
-##
-## Assigns the provided [param snd] to the [member audioSFX] node and plays it one time.
-func playSFX(snd: AudioStream) -> void:
-	audioSFX.stream = snd
-	audioSFX.play()
 
 ## Called when the node enters the scene tree for the first time.
 ##
@@ -103,7 +92,7 @@ func _ready() -> void:
 ## - Highlights the currently selected option.
 ## - Displays and animates the high score label.
 ## - Manages the visibility of the credits screen.
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("take_screenshot"):
 		var image = get_viewport().get_texture().get_data()
 		image.flip_y()
@@ -127,10 +116,10 @@ func _process(delta: float) -> void:
 	
 	if (xAxis != 0 and inputCooldown < 0 and !changingScene):
 		# Handling to prevent the cursor sound from repeating even when the option doesn't change
-		var _newSelected = selected + sign(xAxis)
+		var _newSelected: int = selected + int(sign(xAxis))
 		if _newSelected != selected:
-			playSFX(cursorSnd)
-			selected = clamp(_newSelected, 0, len(options) - 1)
+			Sounds.play_sfx("sfx_menu_click")
+			selected = int(clamp(_newSelected, 0, len(options) - 1))
 			inputCooldown = INPUT_COOLDOWN
 		
 	# Highlight selected option
@@ -143,7 +132,7 @@ func _process(delta: float) -> void:
 		var _callback = options[selected].callback
 		if _callback.is_valid():
 			_callback.call_func()
-			playSFX(confirmSnd)
+			Sounds.play_sfx("sfx_confirm")
 			changingScene = true
 			confirmKey = false
 			
@@ -151,7 +140,7 @@ func _process(delta: float) -> void:
 	var _greatest_score = Global.data_dict["greatest_score"]
 	highScoreLabel.visible = _greatest_score > 0
 	highScoreLabel.text = "MAIOR PONTUAÇÃO: " + str(_greatest_score)
-	var _angle = OS.get_ticks_msec() / 200
+	var _angle = OS.get_ticks_msec() / 200.0
 	highScoreLabel.set_position(Vector2(
 	highScoreLabel.get_position().x,
 	 highScoreLabel.get_position().y + sin(_angle) * 0.5)

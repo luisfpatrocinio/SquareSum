@@ -14,7 +14,7 @@ func _ready() -> void:
 	scale = Vector2(_sc, _sc)
 	pass # Replace with function body.
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	var _accel = false;
 	if controller != null:
 		_accel = controller.success;

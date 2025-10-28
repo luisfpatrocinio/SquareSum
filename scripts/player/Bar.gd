@@ -4,7 +4,7 @@ onready var polygon = get_node("Polygon2D")
 var colliders = [];
 var numbers = [];
 
-func _process(delta):
+func _process(_delta):
 	colliders = get_overlapping_areas()
 	for collider in colliders:		
 		numbers.append(collider.my_number)

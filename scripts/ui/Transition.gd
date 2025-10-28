@@ -8,7 +8,7 @@ var scaleFactor = 0
 func _ready() -> void:
 	polygon.scale = Vector2(scaleFactor, scaleFactor);
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	var _spd = 0.050;
 	scaleFactor = lerp(scaleFactor, 15, _spd)
 	polygon.scale = Vector2(scaleFactor, scaleFactor);

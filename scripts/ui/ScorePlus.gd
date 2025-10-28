@@ -4,7 +4,7 @@ var alpha = 2
 onready var label = get_node("Label")
 
 
-func _process(delta):
+func _process(_delta):
 	if alpha > 0:
 		 alpha -= 0.05
 	else:

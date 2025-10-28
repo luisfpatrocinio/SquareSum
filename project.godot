@@ -31,6 +31,7 @@ config/icon="res://icon.png"
 
 Global="*res://scripts/systems/Global.gd"
 CommControl="*res://CommControl.tscn"
+Sounds="*res://scripts/systems/Sounds.gd"
 
 [display]
 

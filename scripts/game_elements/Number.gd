@@ -10,7 +10,6 @@ onready var label = get_node("Label")
 onready var controller = get_parent()
 onready var succeeded = false;
 onready var destroyParticles = preload("res://scenes/game_elements/ExplosionParticles.tscn");
-var getSound = preload("res://assets/sfx/menuSelectionClick.wav")
 
 var shakeFactor = 3;
 
@@ -18,7 +17,7 @@ func _ready() -> void:
 	pass
 
 
-func _process(delta):
+func _process(_delta):
 	if len(controller.numbersArray) >= 12:
 		radius = 148;
 	if my_scale < 1 and controller.canFadeTransition:
@@ -75,8 +74,7 @@ func _on_Area2D2_tree_exiting() -> void:
 	pass # Replace with function body.
 
 
-func _on_Area2D2_area_entered(area: Area2D) -> void:
+func _on_Area2D2_area_entered(_area: Area2D) -> void:
 	if !controller.success:
-		controller.audioSFX.stream = getSound;
-		controller.audioSFX.pitch_scale = rand_range(0.80, 1.20)
-		controller.audioSFX.play()
+		var _pitch = rand_range(0.80, 1.20)
+		Sounds.play_sfx("sfx_menu_click", _pitch)

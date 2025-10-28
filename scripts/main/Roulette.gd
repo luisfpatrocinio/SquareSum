@@ -21,10 +21,6 @@ onready var NumberScene = preload("res://scenes/game_elements/Number.tscn")
 onready var polygonDeco = preload("res://scenes/game_elements/Polygon.tscn")
 ## The scene for the "+Score" text that appears on successful plays.
 onready var scorePlusScene = preload("res://scenes/game_elements/ScorePlus.tscn")
-## The sound effect played on a correct answer.
-onready var completedSound = preload("res://assets/sfx/pickedCoinEcho.wav")
-## The sound effect played on an incorrect answer.
-onready var wrongSound = preload("res://assets/sfx/errorItem.wav")
 #endregion
 
 #region Node References
@@ -37,13 +33,12 @@ onready var background = get_node("ColorRect")
 # Timers
 onready var timer = get_node("Timer")
 onready var startTimer = get_node("TimerToStart")
-onready var createPolygonTimer = get_node("createPolygonTimer")
+onready var createPolygonTimer = get_node("CreatePolygonTimer")
 onready var canExitTimer = get_node("canExitTimer")
 onready var comboTimer = get_node("ComboTimer")
 
 # UI Labels & Displays
 onready var instructionLabel = get_node("InstructionLabel")
-onready var timerLabel = get_node("TimerLabel")
 onready var barNumberLabel = get_node("BarNumber")
 onready var operator1 = get_node("Operator1")
 onready var operator2 = get_node("Operator2")
@@ -116,7 +111,7 @@ func _ready() -> void:
 	
 	for i in range(10):
 		var _pol = createDecoPolygon()
-		_pol.global_position = Vector2(randi() % 960 / 5 * i / 2, randi() % 480)
+		_pol.global_position = Vector2(randi() % 960 / 5.0 * i / 2.0, randi() % 480)
 	
 	new_level()
 	
@@ -140,7 +135,7 @@ func _process(delta: float) -> void:
 
 	# Smoothly animate the score display
 	var _diff = score - score_draw
-	score_draw = lerp(score_draw, score, 0.1)
+	score_draw = ceil(lerp(score_draw, score, 0.1))
 
 	# --- UI Text Updates ---
 	if Global.usingEsplora:
@@ -158,42 +153,54 @@ func _process(delta: float) -> void:
 	get_node("TutorialLabel2").visible = is_tutorial_level
 	scoreDisplay.visible = not is_tutorial_level
 
+	# Hide tutorial labels upon first success
+	if success:
+		get_node("TutorialLabel").visible = false
+		get_node("TutorialLabel2").visible = false
+		get_node("SwitchWarn").visible = false
+
 	# --- Game Over Logic ---
 	if gameOver:
-		if canExitTimer.is_stopped(): canExitTimer.start()
-		
-		# Hide gameplay elements
-		for node in [barNumberLabel, operator1, operator2, progressBar]: node.visible = false
-		
-		# Display final score and message
-		scoreDisplay.text = "Sua pontuação foi de:\n" + str(floor(score_draw))
-		scoreDisplay.set_position(Vector2(0, 270 - 24))
-		scoreDisplay.margin_left = 0; scoreDisplay.margin_right = 960
-		scoreDisplay.align = Label.ALIGN_CENTER
-		
-		instructionLabel.text = ""
-		instructionLabel.set_position(Vector2(0, scoreDisplay.get_position().y + 100))
-		instructionLabel.margin_left = 0; instructionLabel.margin_right = 960;
-		
-		# Check for new high score
+		var _timer_started = false
+		if canExitTimer.is_stopped(): canExitTimer.start();
+		# Acessando arquivos da persistência
 		var greatest_score = Global.data_dict["greatest_score"]
-		if score > greatest_score:
+		var last_score = Global.data_dict["last_score"]
+		var diff = greatest_score - score
+		instructionLabel.text = ""
+		Global.data_dict["last_score"] = score
+
+		# Declarando os objetos do level invisíveis
+		barNumberLabel.visible = false;
+		operator1.visible = false;
+		operator2.visible = false;
+		progressBar.visible = false;
+
+		# Setar posição das mensagens finais
+		scoreDisplay.text = "Sua pontuação foi de:\n" + str(floor(score_draw))
+		scoreDisplay.margin_left = 0;
+		scoreDisplay.margin_right = 960;
+		scoreDisplay.align = Label.ALIGN_CENTER
+		instructionLabel.margin_left = 0
+		instructionLabel.margin_right = 960
+		scoreDisplay.set_position(Vector2(0, 270 - 24))
+
+		instructionLabel.set_position(Vector2(
+			0, scoreDisplay.get_position().y + 100))
+		instructionLabel.rect_size.x = 960
+
+		if score > greatest_score or greatest_score == 0 or diff == 0:
 			Global.data_dict["greatest_score"] = score
 			instructionLabel.text = "Novo recorde!"
-			var hue = fmod(OS.get_ticks_msec() / 500.0, 1.0)
-			instructionLabel.modulate = hsv_to_rgb(hue, 1, 1)
+			var _hue = float(OS.get_ticks_msec() / 50 % 100)
+			_hue = float(_hue / 100)
+			instructionLabel.modulate = hsv_to_rgb(_hue, 1, 1);
 		else:
-			instructionLabel.text = "Vamos, faltam " + str(greatest_score - score + 1) + " pontos \n para superar sua maior pontuação!"
-			
-		# Save data once
-		if not saved:
-			Global.data_dict["last_score"] = score
-			Global.save_data()
-			saved = true
+			instructionLabel.text = "Vamos, faltam " + str(diff + 1) + " pontos \n para superar sua maior pontuação!"
+		if not saved: Global.save_data(); saved = true
 		
-		if (Input.is_action_just_pressed("ui_accept") or Esplora.get_button_pressed("DOWN")) and can_exit:
-			get_tree().change_scene("res://scenes/main/MainMenu.tscn")
-		return
+	else:
+		scoreDisplay.text = str("Pontuação: " + str(score_draw))
 
 	# --- Main Gameplay Loop ---
 	scoreDisplay.text = str("Pontuação: " + str(int(score_draw)))
@@ -241,6 +248,7 @@ func _process(delta: float) -> void:
 	update_instruction_label()
 	update_combo_display()
 	update_bar_elements()
+	update_bar_color()
 	update_highlighted_numbers()
 	update_timer_bar()
 	
@@ -253,6 +261,9 @@ func _process(delta: float) -> void:
 	## Checks the player's submitted answer and updates the game state.
 	## Called when the player presses the confirm button.
 func check_answer():
+	if not is_instance_valid(line):
+		return
+		
 	if len(line.numbers) != 2: return
 
 	if get_sum(line.numbers) == desired_number:
@@ -264,9 +275,8 @@ func check_answer():
 		startTimer.start()
 		
 		# Sound and scoring
-		audioSFX.stream = completedSound
-		audioSFX.pitch_scale = min(0.80 + 0.05 * actualLevel, 2)
-		audioSFX.play()
+		var _pitch = min(0.80 + 0.05 * actualLevel, 2)
+		Sounds.play_sfx("sfx_confirm", _pitch)
 		
 		if actualLevel > 1 or Global.data_dict["times_played"] > 1:
 			combo += 1
@@ -279,10 +289,11 @@ func check_answer():
 		# Clean up non-selected numbers
 		for nmb in numbersArray:
 			var wr = weakref(nmb)
-			if wr.get_ref() and not nmb.highlighted:
-				nmb.queue_free()
-			else:
-				nmb.succeeded = true
+			if wr.get_ref():
+				if !(nmb in line.colliders):
+					nmb.queue_free()
+				else:
+					nmb.succeeded = true
 	else:
 		# Incorrect answer
 		if len(line.colliders) > 0:
@@ -291,9 +302,8 @@ func check_answer():
 			combo = 0
 			comboTimer.stop()
 			
-			audioSFX.stream = wrongSound
-			audioSFX.pitch_scale = rand_range(0.95, 1.05)
-			audioSFX.play()
+			var _pitch = rand_range(0.95, 1.05)
+			Sounds.play_sfx("sfx_error", _pitch)
 			
 			# Remove wrongly selected numbers
 			for nmb in line.colliders:
@@ -311,10 +321,10 @@ func new_level():
 	numbersArray.clear()
 	
 	# Generate new numbers based on level
-	var totalNumbers = 4 + floor(actualLevel / 3) * 2
+	var totalNumbers = 4 + floor(actualLevel / 3.0) * 2
 	if actualLevel == 0: totalNumbers = 2
 	
-	for i in range(totalNumbers):
+	for _i in range(totalNumbers):
 		var max_val = min(1 + actualLevel + 2, 8)
 		var num_val = 1 + randi() % max_val
 		spawn_number(num_val)
@@ -326,7 +336,7 @@ func new_level():
 	timer.paused = false
 	timer.start(MAX_TIME)
 	
-	for i in range(3): createDecoPolygon()
+	for _i in range(3): createDecoPolygon()
 
 ## Calculates the total sum of numbers in an array, plus the fixed bar number.
 func get_sum(array: Array) -> int:
@@ -359,7 +369,7 @@ func generate_bar_number() -> int:
 func generate_desired_number() -> int:
 	if numbersArray.size() < 2: return 0
 	
-	var half_size = numbersArray.size() / 2
+	var half_size = int(numbersArray.size() / 2.0)
 	var rand_index1 = randi() % half_size
 	var rand_index2 = rand_index1 + half_size
 	
@@ -430,6 +440,15 @@ func update_bar_elements():
 	operator1.rect_position = line_center - Vector2(cos(angle_rad), sin(angle_rad)) * 60
 	operator2.rect_position = line_center + Vector2(cos(angle_rad), sin(angle_rad)) * 60
 
+## Updates the color of the bar and its elements based on game state.
+func update_bar_color():
+	var lwr = weakref(line)
+	if not lwr.get_ref(): return
+	if len(line.colliders) > 0:
+		line.polygon.color = hsv_to_rgb(globalColorH, 0.80, 0.80)
+	else:
+		line.polygon.color = hsv_to_rgb(globalColorH, 0.80, 0.60)
+
 ## Updates which numbers are visually highlighted based on collision with the bar.
 func update_highlighted_numbers():
 	for nmb in numbersArray:
@@ -463,6 +482,12 @@ func update_timer_bar():
 		progressBar.tint_progress = Color.black
 	else:
 		progressBar.tint_progress = hsv_to_rgb(globalColorH, 0.5, 0.5)
+
+	# Time bar square colors
+	var _bigSquare = progressBar.get_node("RecUP");
+	_bigSquare.color = hsv_to_rgb(globalColorH, 0.80, 0.50);
+	var _smallSquare = progressBar.get_node("RecDown");
+	_smallSquare.color = hsv_to_rgb(globalColorH, 0.75, 0.75);
 #endregion
 
 
