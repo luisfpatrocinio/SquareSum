@@ -22,10 +22,11 @@ _global_script_class_icons={
 
 config/name="Square Sum"
 run/main_scene="res://scenes/main/MainMenu.tscn"
-boot_splash/image="res://assets/images/labirasLogo.png"
+boot_splash/image="res://SquareSumLogo.png"
 boot_splash/fullsize=false
 boot_splash/use_filter=false
-config/icon="res://icon.png"
+boot_splash/bg_color=Color( 0.0392157, 0, 0.0392157, 1 )
+config/icon="res://SquareSumLogo.png"
 
 [autoload]
 
