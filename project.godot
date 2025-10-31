@@ -84,7 +84,7 @@ take_screenshot={
 
 [locale]
 
-test="pt"
+test="en"
 translations=PoolStringArray( "res://localization.de.translation", "res://localization.en.translation", "res://localization.es.translation", "res://localization.fr.translation", "res://localization.pt.translation" )
 
 [physics]
