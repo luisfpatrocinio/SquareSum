@@ -55,10 +55,6 @@ var creditsAlpha: float = 0.0
 ## effect, centers the game window, and dynamically creates the menu buttons. It also
 ## populates the screen with initial decorative polygons.
 func _ready() -> void:
-	print(TranslationServer.get_loaded_locales())
-	TranslationServer.set_locale("pt")
-	var _lang = preload("res://localization.pt.translation")
-	print(_lang.get_message_list())
 	Global.load_data()
 	transAlpha.visible = true
 	# Adjust window position
@@ -143,7 +139,7 @@ func _process(_delta: float) -> void:
 	# Show HighScore
 	var _greatest_score = Global.data_dict["greatest_score"]
 	highScoreLabel.visible = _greatest_score > 0
-	highScoreLabel.text = tr("highscore.prefix") + str(_greatest_score)
+	highScoreLabel.text = tr("highscore.prefix") + " " +str(_greatest_score)
 	var _angle = OS.get_ticks_msec() / 200.0
 	highScoreLabel.set_position(Vector2(
 	highScoreLabel.get_position().x,

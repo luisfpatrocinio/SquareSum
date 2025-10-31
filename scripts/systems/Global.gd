@@ -11,7 +11,7 @@ var data_dict = {
 var usingEsplora = false;
 
 func _ready():
-	
+	print("[Idiomas carregados: ", TranslationServer.get_loaded_locales())
 	pass
 
 func save_data():

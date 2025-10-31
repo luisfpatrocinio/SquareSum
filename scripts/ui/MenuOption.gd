@@ -12,13 +12,13 @@ var callback = funcref(self, "startGame");
 func _ready() -> void:
 	match no:
 		0: 
-			label.text = "Iniciar"; 
+			label.text = tr("menu.start"); 
 			callback = funcref(self, "startGame");	
 		1:
-			label.text = "Créditos";
+			label.text = tr("menu.credits"); 
 			callback = funcref(self, "showCredits");
 		2:
-			label.text = "Sair";
+			label.text = tr("menu.exit"); 
 			callback = funcref(self, "exitGame");
 
 

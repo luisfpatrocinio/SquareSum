@@ -70,21 +70,7 @@ margin_right = 640.0
 margin_bottom = 500.0
 rect_pivot_offset = Vector2( 160, 50 )
 theme = SubResource( 3 )
-text = "Square Sum:
-Gameficação no Ensino Utilizando Sensores
-
-Jogo desenvolvido para a Mostra Nacional de Robótica 2023.
-
-Desenvolvido por:
-Lívia Tainá Alves de Brito
-Luis Felipe dos Santos Patrocinio
-Ryan Faustino Carvalho
-
-Músicas:
-Stars Don't Twinkle - Level27
-The Club Entrance - Level27
-
-Labiras - IFPI"
+text = "menu.credits_text"
 align = 1
 valign = 1
 autowrap = true
@@ -95,7 +81,7 @@ margin_right = 960.0
 margin_bottom = 186.0
 theme = ExtResource( 4 )
 custom_fonts/font = SubResource( 1 )
-text = "SQUARE SUM"
+text = "ui.title"
 align = 1
 
 [node name="CommControl" parent="." instance=ExtResource( 1 )]

@@ -21,6 +21,8 @@ onready var NumberScene = preload("res://scenes/game_elements/Number.tscn")
 onready var polygonDeco = preload("res://scenes/game_elements/Polygon.tscn")
 ## The scene for the "+Score" text that appears on successful plays.
 onready var scorePlusScene = preload("res://scenes/game_elements/ScorePlus.tscn")
+
+onready var transitionScene = preload("res://scenes/ui/Transition.tscn");
 #endregion
 
 #region Node References
@@ -196,14 +198,14 @@ func _process(delta: float) -> void:
 			_hue = float(_hue / 100)
 			instructionLabel.modulate = hsv_to_rgb(_hue, 1, 1);
 		else:
-			instructionLabel.text = tr("gameover.missing_points") % str(diff + 1)
+			instructionLabel.text = tr("gameover.missing_points") % str(diff)
 		if not saved: Global.save_data(); saved = true
 		
 	else:
-		scoreDisplay.text = tr("score.prefix") + str(score_draw)
+		scoreDisplay.text = tr("score.prefix") + " " + str(score_draw)
 
 	# --- Main Gameplay Loop ---
-	scoreDisplay.text = tr("score.prefix") + str(int(score_draw))
+	scoreDisplay.text = tr("score.prefix") + " "  + str(int(score_draw))
 	
 	# Update color palette based on level and combo "fever"
 	globalColorH = fmod(actualLevel * 0.168, 1.0)
@@ -243,6 +245,11 @@ func _process(delta: float) -> void:
 	var confirmKey = Input.is_action_just_pressed("ui_accept") or Esplora.get_button_pressed("DOWN")
 	if confirmKey and not success:
 		check_answer()
+	if confirmKey and gameOver and can_exit:
+		var trans = transitionScene.instance();
+		add_child(trans)
+		trans.global_position = Vector2(480, 270);
+		trans.destinyScene = "res://scenes/main/MainMenu.tscn"
 
 	# --- UI and Visual Feedback Updates ---
 	update_instruction_label()
