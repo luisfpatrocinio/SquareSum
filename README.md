@@ -45,6 +45,8 @@ O projeto já possui versões prontas para jogar nas pastas:
 - `Build/Windows/`: Executável para Windows.
 - `Build/`: Versão para navegador (HTML5). Basta abrir o arquivo `index.html`.
 
+- Jogue online: [Square Sum no itch.io](https://patrocinioluisf.itch.io/square-sum)
+
 ## 🧑‍💻 Desenvolvido por
 
 - **Lívia Tainá Alves de Brito**
