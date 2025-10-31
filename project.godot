@@ -20,7 +20,7 @@ _global_script_class_icons={
 
 [application]
 
-config/name="Square Sum"
+config/name=false
 run/main_scene="res://scenes/main/MainMenu.tscn"
 boot_splash/image="res://SquareSumLogo.png"
 boot_splash/fullsize=false
@@ -81,6 +81,11 @@ take_screenshot={
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777238,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
 }
+
+[locale]
+
+test="pt"
+translations=PoolStringArray( "res://localization.de.translation", "res://localization.en.translation", "res://localization.es.translation", "res://localization.fr.translation", "res://localization.pt.translation" )
 
 [physics]
 

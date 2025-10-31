@@ -1,0 +1,16 @@
+keys;en;pt;fr;de;es
+highscore.prefix;HIGH SCORE: ;MAIOR PONTUAÇÃO: ;MEILLEUR SCORE : ;HÖCHSTPUNKTZAHL: ;MEJOR PUNTUACIÓN:
+tutorial.esplora;Tilt the controller to move the bar.;Incline o controle para movimentar a barra.;Inclinez la manette pour déplacer la barre.;Neigen Sie den Controller um die Leiste zu bewegen.;Inclina el control para mover la barra.
+tutorial.keyboard;Use the arrow keys to move the bar.;Use as setas para movimentar a barra.;Utilisez les flèches pour déplacer la barre.;Verwenden Sie die Pfeiltasten, um die Leiste zu bewegen.;Usa las flechas para mover la barra.
+tutorial.get_sum;Get the desired sum!;Obtenha a soma desejada!;Obtenez la somme souhaitée !;Erreiche die gewünschte Summe!;¡Obtén la suma deseada!
+switch.confirm;Press %s to confirm!;Aperte %s para confirmar!;Appuyez sur %s pour confirmer !;Drücken Sie %s zum Bestätigen!;¡Pulsa %s para confirmar!
+switch.exit;Press %s to exit.;Aperte %s para sair.;Appuyez sur %s pour quitter.;Drücken Sie %s zum Beenden.;Pulsa %s para salir.
+score.prefix;Score: ;Pontuação: ;Score : ;Punktestand: ;Puntuación:
+gameover.score_intro;Your score was:\n;Sua pontuação foi de:\n;Votre score est :\n;Dein Punktestand war:\n;Tu puntuación fue:\n
+gameover.new_record;New record!;Novo recorde!;Nouveau record !;Neuer Rekord!;¡Nuevo récord!
+gameover.missing_points;Come on, you need %s more points\n to beat your high score!;Vamos, faltam %s pontos \n para superar sua maior pontuação!;Il vous manque %s points\n pour battre votre meilleur score !;Dir fehlen noch %s Punkte\n um deinen Rekord zu brechen!;Vamos, faltan %s puntos\n para superar tu mejor puntuación!
+instruction.equals_prefix;= ;= ;= ;= ;=
+instruction.question_suffix;?;?;?;?;?
+instruction.exclaim_suffix;!;!;!;!;!
+combo.label;Combo x%s!;Combo x%s!;Combo x%s !;Combo x%s!;Combo x%s!
+score.plus_prefix;+;+;+;+;+

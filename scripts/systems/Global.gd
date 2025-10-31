@@ -8,7 +8,7 @@ var data_dict = {
 	"times_played": 0
 }
 
-var usingEsplora = true;
+var usingEsplora = false;
 
 func _ready():
 	

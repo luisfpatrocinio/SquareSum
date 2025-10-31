@@ -139,11 +139,11 @@ func _process(delta: float) -> void:
 
 	# --- UI Text Updates ---
 	if Global.usingEsplora:
-		get_node("TutorialLabel").text = "Incline o controle para movimentar a barra."
+		get_node("TutorialLabel").text = tr("tutorial.esplora")
 	else:
-		get_node("TutorialLabel").text = "Use as setas para movimentar a barra."
-	get_node("TutorialLabel2").text = "Obtenha a soma desejada!"
-	get_node("SwitchWarn").text = "Aperte %s para confirmar!" % ["SWITCH 1" if Global.usingEsplora else "ENTER"]
+		get_node("TutorialLabel").text = tr("tutorial.keyboard")
+	get_node("TutorialLabel2").text = tr("tutorial.get_sum")
+	get_node("SwitchWarn").text = tr("switch.confirm") % ["SWITCH 1" if Global.usingEsplora else "ENTER"]
 	
 	# Tutorial visibility logic
 	var is_tutorial_level = actualLevel <= 1
@@ -177,7 +177,7 @@ func _process(delta: float) -> void:
 		progressBar.visible = false;
 
 		# Setar posição das mensagens finais
-		scoreDisplay.text = "Sua pontuação foi de:\n" + str(floor(score_draw))
+		scoreDisplay.text = tr("gameover.score_intro") + str(floor(score_draw))
 		scoreDisplay.margin_left = 0;
 		scoreDisplay.margin_right = 960;
 		scoreDisplay.align = Label.ALIGN_CENTER
@@ -191,19 +191,19 @@ func _process(delta: float) -> void:
 
 		if score > greatest_score or greatest_score == 0 or diff == 0:
 			Global.data_dict["greatest_score"] = score
-			instructionLabel.text = "Novo recorde!"
+			instructionLabel.text = tr("gameover.new_record")
 			var _hue = float(OS.get_ticks_msec() / 50 % 100)
 			_hue = float(_hue / 100)
 			instructionLabel.modulate = hsv_to_rgb(_hue, 1, 1);
 		else:
-			instructionLabel.text = "Vamos, faltam " + str(diff + 1) + " pontos \n para superar sua maior pontuação!"
+			instructionLabel.text = tr("gameover.missing_points") % str(diff + 1)
 		if not saved: Global.save_data(); saved = true
 		
 	else:
-		scoreDisplay.text = str("Pontuação: " + str(score_draw))
+		scoreDisplay.text = tr("score.prefix") + str(score_draw)
 
 	# --- Main Gameplay Loop ---
-	scoreDisplay.text = str("Pontuação: " + str(int(score_draw)))
+	scoreDisplay.text = tr("score.prefix") + str(int(score_draw))
 	
 	# Update color palette based on level and combo "fever"
 	globalColorH = fmod(actualLevel * 0.168, 1.0)
@@ -388,7 +388,7 @@ func flashScreen():
 ## Instantiates a "+Score" label that floats up from the score display.
 func show_score_plus(value: int):
 	var scorePlus = scorePlusScene.instance()
-	scorePlus.get_node("Label").text = "+" + str(value)
+	scorePlus.get_node("Label").text = tr("score.plus_prefix") + str(value)
 	scorePlus.global_position = Vector2(
 		scoreDisplay.rect_position.x + scoreDisplay.rect_size.x - 32,
 		scoreDisplay.rect_position.y)
@@ -405,17 +405,18 @@ func createDecoPolygon():
 ## Updates the instruction label text (e.g., "= 10?" or "= 10!").
 func update_instruction_label():
 	if gameOver: return
-	instructionLabel.text = "= " + str(desired_number)
+	instructionLabel.text = tr("instruction.equals_prefix") + str(desired_number)
 	if not success:
-		if len(line.colliders) > 0: instructionLabel.text += "?"
+		if len(line.colliders) > 0:
+			instructionLabel.text += tr("instruction.question_suffix")
 	else:
-		instructionLabel.text += "!"
+		instructionLabel.text += tr("instruction.exclaim_suffix")
 		
 ## Updates the combo display's visibility, text, and animation.
 func update_combo_display():
 	comboDisplay.visible = combo > 1
 	if comboDisplay.visible:
-		comboDisplay.get_node("Label").text = "Combo x" + str(combo) + "!"
+		comboDisplay.get_node("Label").text = tr("combo.label") % str(combo)
 		# Pop animation
 		var angle = deg2rad(visual_combo_angle)
 		if visual_combo_angle > 0:
@@ -540,6 +541,6 @@ func _on_ComboTimer_timeout() -> void:
 func _on_canExitTimer_timeout():
 	var exitWarn = get_node("exitWarn")
 	exitWarn.visible = true
-	exitWarn.text = "Aperte %s para sair." % ["SWITCH 1" if Global.usingEsplora else "ENTER"]
+	exitWarn.text = tr("switch.exit") % ["SWITCH 1" if Global.usingEsplora else "ENTER"]
 	can_exit = true
 #endregion
