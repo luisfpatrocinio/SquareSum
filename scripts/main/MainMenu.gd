@@ -61,14 +61,18 @@ func _ready() -> void:
 	OS.center_window()
 	
 	# Create Options
-	var _optionsNmb = 3
-	if OS.get_name() == "HTML5": _optionsNmb = 2
-	var _spac = 960 / (_optionsNmb + 1)
-	for i in range(_optionsNmb):
+	var _optionsIds: Array = ["start", "credits", "exit"]
+
+	# Remove "exit" option on HTML5 builds
+	if OS.get_name() == "HTML5":
+		_optionsIds.erase("exit")
+
+	var _spac = 960 / (_optionsIds.size() + 1)
+	for i in range(_optionsIds.size()):
 		var _op = optionScene.instance()
+		_op.no = i;
 		_op.global_position = Vector2(_spac + _spac * i, 270)
-		_op.no = i
-		# @TODO: Add these children to their own node.
+		_op.optionId = _optionsIds[i];
 		get_node("Buttons").add_child(_op)
 		options.append(_op)
 		
@@ -139,7 +143,7 @@ func _process(_delta: float) -> void:
 	# Show HighScore
 	var _greatest_score = Global.data_dict["greatest_score"]
 	highScoreLabel.visible = _greatest_score > 0
-	highScoreLabel.text = tr("highscore.prefix") + " " +str(_greatest_score)
+	highScoreLabel.text = tr("highscore.prefix") + " " + str(_greatest_score)
 	var _angle = OS.get_ticks_msec() / 200.0
 	highScoreLabel.set_position(Vector2(
 	highScoreLabel.get_position().x,

@@ -1,29 +1,34 @@
 extends Node2D
 
 var highlighted = false;
-var no = 0;
+var no: int = 0;
+var optionId: String = "";
 onready var polygon = get_node("Polygon2D");
 onready var label = get_node("Label");
 onready var transitionScene = preload("res://scenes/ui/Transition.tscn");
 var scaleTo = 1;
 var myScale = 1;
 var callback = funcref(self, "startGame");
+export var optionTextKey: String = ""
 
 func _ready() -> void:
-	match no:
-		0: 
+	match optionId:
+		"start": 
 			label.text = tr("menu.start"); 
 			callback = funcref(self, "startGame");	
-		1:
+		"credits":
 			label.text = tr("menu.credits"); 
 			callback = funcref(self, "showCredits");
-		2:
+		"exit":
 			label.text = tr("menu.exit"); 
 			callback = funcref(self, "exitGame");
 
 
-
 func _process(delta: float) -> void:
+	# Initialize text
+	if label.text == "" or label.text == "optionTextKey":
+		label.text = tr(optionTextKey)
+		
 	if highlighted:
 		polygon.rotation_degrees += 64 * delta;
 		if polygon.rotation_degrees > 360: polygon.rotation_degrees -= 360;

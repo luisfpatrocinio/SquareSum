@@ -21,6 +21,6 @@ margin_bottom = 19.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource( 2 )
-text = "Iniciar"
+text = "optionTextKey"
 align = 1
 valign = 1

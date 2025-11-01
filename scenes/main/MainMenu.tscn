@@ -51,12 +51,13 @@ autoplay = true
 [node name="AudioSFX" type="AudioStreamPlayer" parent="."]
 
 [node name="HighScore" type="Label" parent="."]
-margin_left = 304.0
+anchor_bottom = 0.468
 margin_top = 479.0
-margin_right = 673.0
+margin_right = 960.0
 margin_bottom = 517.0
 theme = ExtResource( 4 )
-text = "MAIOR PONTUAÇÂO: XX"
+text = "HIGHEST SCORE: XX"
+align = 1
 
 [node name="Credits" type="ColorRect" parent="."]
 margin_right = 960.0
@@ -64,9 +65,9 @@ margin_bottom = 540.0
 color = Color( 0, 0, 0, 0.470588 )
 
 [node name="Label" type="Label" parent="Credits"]
-margin_left = 320.0
+margin_left = 264.0
 margin_top = 120.0
-margin_right = 640.0
+margin_right = 696.0
 margin_bottom = 500.0
 rect_pivot_offset = Vector2( 160, 50 )
 theme = SubResource( 3 )
