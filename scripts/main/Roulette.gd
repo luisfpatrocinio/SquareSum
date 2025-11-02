@@ -21,8 +21,6 @@ onready var NumberScene = preload("res://scenes/game_elements/Number.tscn")
 onready var polygonDeco = preload("res://scenes/game_elements/Polygon.tscn")
 ## The scene for the "+Score" text that appears on successful plays.
 onready var scorePlusScene = preload("res://scenes/game_elements/ScorePlus.tscn")
-
-onready var transitionScene = preload("res://scenes/ui/Transition.tscn");
 #endregion
 
 #region Node References
@@ -246,10 +244,7 @@ func _process(delta: float) -> void:
 	if confirmKey and not success:
 		check_answer()
 	if confirmKey and gameOver and can_exit:
-		var trans = transitionScene.instance();
-		add_child(trans)
-		trans.global_position = Vector2(480, 270);
-		trans.destinyScene = "res://scenes/main/MainMenu.tscn"
+		Global.transitionToScene("mainMenu")
 
 	# --- UI and Visual Feedback Updates ---
 	update_instruction_label()

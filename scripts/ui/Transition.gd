@@ -13,5 +13,5 @@ func _process(_delta: float) -> void:
 	scaleFactor = lerp(scaleFactor, 15, _spd)
 	polygon.scale = Vector2(scaleFactor, scaleFactor);
 	if (scaleFactor > 14):
-		get_tree().change_scene(destinyScene);
+		get_tree().change_scene_to(destinyScene);
 		queue_free()

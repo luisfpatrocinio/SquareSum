@@ -1,11 +1,17 @@
 extends Node
 
 var save_path = "user://savegame.save"
+onready var transitionScene = preload("res://scenes/ui/Transition.tscn");
 
 var data_dict = {
 	"last_score": 0,
 	"greatest_score": 0,
 	"times_played": 0
+}
+
+var scenesDict = {
+	"mainMenu": preload("res://scenes/main/MainMenu.tscn"),
+	"game": preload("res://scenes/main/Level.tscn")
 }
 
 var usingEsplora = false;
@@ -41,3 +47,8 @@ func load_data():
 	else:
 		print("[ load_data (ERR) ]: Arquivo de save não foi encontrado! (missing)")
 		
+func transitionToScene(_sceneKey: String) -> void:
+	var trans = transitionScene.instance();
+	add_child(trans)
+	trans.global_position = Vector2(480, 270);
+	trans.destinyScene = Global.scenesDict[_sceneKey]

@@ -20,7 +20,8 @@ _global_script_class_icons={
 
 [application]
 
-config/name=false
+config/name="Square Sum"
+config/description="Square Sum is a game that stimulates logical and mathematical reasoning, challenging your ability to solve calculations within a set time."
 run/main_scene="res://scenes/main/MainMenu.tscn"
 boot_splash/image="res://SquareSumLogo.png"
 boot_splash/fullsize=false
@@ -30,7 +31,7 @@ config/icon="res://SquareSumLogo.png"
 
 [autoload]
 
-Global="*res://scripts/systems/Global.gd"
+Global="*res://scenes/systems/Global.tscn"
 CommControl="*res://CommControl.tscn"
 Sounds="*res://scripts/systems/Sounds.gd"
 

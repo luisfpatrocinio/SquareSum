@@ -61,7 +61,7 @@ func _ready() -> void:
 	OS.center_window()
 	
 	# Create Options
-	var _optionsIds: Array = ["start", "credits", "exit"]
+	var _optionsIds: Array = ["start", "options", "credits", "exit"]
 
 	# Remove "exit" option on HTML5 builds
 	if OS.get_name() == "HTML5":
@@ -137,7 +137,7 @@ func _process(_delta: float) -> void:
 		if _callback.is_valid():
 			_callback.call_func()
 			Sounds.play_sfx("sfx_confirm")
-			changingScene = true
+			changingScene = true # TODO: This may not always be true.
 			confirmKey = false
 			
 	# Show HighScore
@@ -174,6 +174,13 @@ func _on_CreatePolygonTimer_timeout() -> void:
 		randi() % 480
 	)
 	add_child(_pol)
+
+func goToOptionsMenu() -> void:
+	print("Going to Options Menu...")
+	
+	# TODO: temp behaviour
+	yield(get_tree().create_timer(1), "timeout")
+	changingScene = false
 
 ## Contains debug-only functionality.
 ##

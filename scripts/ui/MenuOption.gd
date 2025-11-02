@@ -5,7 +5,6 @@ var no: int = 0;
 var optionId: String = "";
 onready var polygon = get_node("Polygon2D");
 onready var label = get_node("Label");
-onready var transitionScene = preload("res://scenes/ui/Transition.tscn");
 var scaleTo = 1;
 var myScale = 1;
 var callback = funcref(self, "startGame");
@@ -13,15 +12,18 @@ export var optionTextKey: String = ""
 
 func _ready() -> void:
 	match optionId:
-		"start": 
-			label.text = tr("menu.start"); 
-			callback = funcref(self, "startGame");	
+		"start":
+			label.text = tr("menu.start");
+			callback = funcref(self, "startGame");
 		"credits":
-			label.text = tr("menu.credits"); 
+			label.text = tr("menu.credits");
 			callback = funcref(self, "showCredits");
 		"exit":
-			label.text = tr("menu.exit"); 
+			label.text = tr("menu.exit");
 			callback = funcref(self, "exitGame");
+		"options":
+			label.text = tr("menu.options");
+			callback = funcref(self, "goToOptions");
 
 
 func _process(delta: float) -> void:
@@ -46,10 +48,7 @@ func _process(delta: float) -> void:
 
 func startGame():
 	print("Starting...")
-	var trans = transitionScene.instance();
-	trans.global_position = Vector2(480, 270);
-	trans.destinyScene = "res://scenes/main/Level.tscn";
-	get_parent().get_parent().add_child(trans)
+	Global.transitionToScene("game")
 	
 func showCredits():
 	get_parent().get_parent().showingCredits = true;
@@ -57,3 +56,6 @@ func showCredits():
 
 func exitGame():
 	get_tree().quit()
+
+func goToOptions():
+	get_parent().get_parent().goToOptionsMenu()
