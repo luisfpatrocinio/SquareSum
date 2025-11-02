@@ -238,12 +238,9 @@ theme = ExtResource( 2 )
 text = "Aperte SWITCH 1 para confirmar!"
 align = 1
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
-visible = false
-
-[node name="TransitionFadeOut" type="ColorRect" parent="CanvasLayer"]
-margin_right = 960.0
-margin_bottom = 540.0
+[node name="FadeTimer" type="Timer" parent="Controller"]
+wait_time = 0.5
+one_shot = true
 
 [connection signal="timeout" from="Controller/canExitTimer" to="Controller" method="_on_canExitTimer_timeout"]
 [connection signal="timeout" from="Controller/Timer" to="Controller" method="_on_Timer_timeout"]
@@ -251,3 +248,4 @@ margin_bottom = 540.0
 [connection signal="timeout" from="Controller/CreatePolygonTimer" to="Controller" method="_on_CreatePolygonTimer_timeout"]
 [connection signal="timeout" from="Controller/TransitionTimer" to="Controller" method="_on_TransitionTimer_timeout"]
 [connection signal="timeout" from="Controller/ComboTimer" to="Controller" method="_on_ComboTimer_timeout"]
+[connection signal="timeout" from="Controller/FadeTimer" to="Controller" method="_on_FadeTimer_timeout"]

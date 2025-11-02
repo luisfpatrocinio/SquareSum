@@ -1,7 +1,10 @@
 extends Node
 
 var save_path = "user://savegame.save"
+
 onready var transitionScene = preload("res://scenes/ui/Transition.tscn");
+onready var transitionCanvasLayer = get_node("TransitionCanvasLayer")
+onready var transAlphaRect = transitionCanvasLayer.get_node("TransitionFadeOut")
 
 var data_dict = {
 	"last_score": 0,
@@ -19,6 +22,9 @@ var usingEsplora = false;
 func _ready():
 	print("[Idiomas carregados: ", TranslationServer.get_loaded_locales())
 	pass
+	
+func SetWhiteRectAlpha(_alpha: float) -> void:
+	transAlphaRect.color.a = _alpha;
 
 func save_data():
 	var file = File.new()

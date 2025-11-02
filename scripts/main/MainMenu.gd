@@ -21,8 +21,6 @@ onready var polygonDeco = preload("res://scenes/game_elements/Polygon.tscn")
 #region Node References
 ## Timer used to periodically spawn new decorative polygons.
 onready var createPolygonTimer = get_node("CreatePolygonTimer")
-## The ColorRect node used for the screen fade-out transition effect.
-onready var transAlpha = get_node("CanvasLayer/TransitionFadeOut")
 ## The AudioStreamPlayer responsible for playing menu sound effects.
 onready var audioSFX = get_node("AudioSFX")
 ## The Label node that displays the player's highest score.
@@ -56,7 +54,8 @@ var creditsAlpha: float = 0.0
 ## populates the screen with initial decorative polygons.
 func _ready() -> void:
 	Global.load_data()
-	transAlpha.visible = true
+	Global.transAlphaRect.visible = true
+	Global.SetWhiteRectAlpha(1.0);
 	# Adjust window position
 	OS.center_window()
 	
@@ -103,9 +102,9 @@ func _process(_delta: float) -> void:
 		image.save_png("user://screenshot" + str(OS.get_ticks_msec() % 1000) + ".png")
 		print("Screenshot saved!")
 	
+	Global.SetWhiteRectAlpha(lerp(Global.transAlphaRect.color.a, 0.0, 0.068));
+	
 	debug()
-	# Fade Out Transition
-	transAlpha.color.a = lerp(transAlpha.color.a, 0, 0.068)
 	
 	# Reload Input Cooldown
 	if inputCooldown >= 0: inputCooldown -= 1

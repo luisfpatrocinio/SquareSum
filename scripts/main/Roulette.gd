@@ -33,6 +33,7 @@ onready var background = get_node("ColorRect")
 # Timers
 onready var timer = get_node("Timer")
 onready var startTimer = get_node("TimerToStart")
+onready var fadeTimer = get_node("FadeTimer")
 onready var createPolygonTimer = get_node("CreatePolygonTimer")
 onready var canExitTimer = get_node("canExitTimer")
 onready var comboTimer = get_node("ComboTimer")
@@ -96,6 +97,8 @@ var visual_combo_angle: float = 0.0
 var barAngSpd: int = 12
 ## A flag used to enable the fade-in transition after a short delay.
 var canFadeTransition: bool = false
+## Fade between levels
+var fading: bool = false
 #endregion
 
 
@@ -107,7 +110,6 @@ var canFadeTransition: bool = false
 func _ready() -> void:
 	randomize()
 	Global.data_dict["times_played"] += 1
-	get_parent().get_node("CanvasLayer").visible = true
 	
 	for i in range(10):
 		var _pol = createDecoPolygon()
@@ -203,7 +205,7 @@ func _process(delta: float) -> void:
 		scoreDisplay.text = tr("score.prefix") + " " + str(score_draw)
 
 	# --- Main Gameplay Loop ---
-	scoreDisplay.text = tr("score.prefix") + " "  + str(int(score_draw))
+	scoreDisplay.text = tr("score.prefix") + " " + str(int(score_draw))
 	
 	# Update color palette based on level and combo "fever"
 	globalColorH = fmod(actualLevel * 0.168, 1.0)
@@ -220,9 +222,9 @@ func _process(delta: float) -> void:
 	# Visual effects timers
 	flash.color.a = lerp(flash.color.a, 0, 0.20)
 	wrong_timer -= 0.1
-	if canFadeTransition:
-		var trans = get_parent().get_node("CanvasLayer/TransitionFadeOut")
-		trans.color.a = lerp(trans.color.a, 0, 0.068)
+
+	var _newAlpha = 0.0 if not fading else 1.0
+	Global.SetWhiteRectAlpha(lerp(Global.transAlphaRect.color.a, _newAlpha, 0.128));
 
 	# Handle player input for bar rotation
 	var xAxis = Input.get_axis("ui_left", "ui_right")
@@ -275,6 +277,7 @@ func check_answer():
 		timer.start(min(timer.time_left + 5, MAX_TIME))
 		timer.paused = true
 		startTimer.start()
+		fadeTimer.start()
 		
 		# Sound and scoring
 		var _pitch = min(0.80 + 0.05 * actualLevel, 2)
@@ -314,6 +317,7 @@ func check_answer():
 ## Sets up a new level by clearing old numbers and generating a new challenge.
 func new_level():
 	success = false
+	fading = false
 	direction = 1 if randi() % 2 == 0 else -1
 	
 	# Clear old numbers
@@ -546,3 +550,7 @@ func _on_canExitTimer_timeout():
 	exitWarn.text = tr("switch.exit") % ["SWITCH 1" if Global.usingEsplora else "ENTER"]
 	can_exit = true
 #endregion
+
+
+func _on_FadeTimer_timeout():
+	fading = true;

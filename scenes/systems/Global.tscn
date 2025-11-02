@@ -5,3 +5,10 @@
 [node name="Global" type="Node2D"]
 z_index = 1000
 script = ExtResource( 1 )
+
+[node name="TransitionCanvasLayer" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="TransitionFadeOut" type="ColorRect" parent="TransitionCanvasLayer"]
+margin_right = 960.0
+margin_bottom = 540.0
